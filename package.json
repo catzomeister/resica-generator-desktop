@@ -1,0 +1,24 @@
+{
+  "name": "nauti-catagen-gui",
+  "version": "1.0.0",
+  "description": "GUI for Catagen made with Electron",
+  "main": "app/index.js",
+  "scripts": {
+    "start": "electron .",
+    "sass:build": "node-sass app/scss -o app/css",
+    "sass:watch": "node-sass -w app/render/scss -o app/render/css"
+  },
+  "keywords": [ "Electron", "Catagen"],
+  "author": "catzomeister",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^13.2.1",
+    "node-sass": "^5.0.0"
+  },
+  "dependencies": {
+    "chokidar": "^3.4.3",
+    "drag-drop": "^6.1.0",
+    "fs-extra": "^9.0.1",
+    "open": "^7.3.0"
+  }
+}

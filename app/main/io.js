@@ -33,11 +33,13 @@ exports.getFiles = () => {
 
 // add files
 exports.addFiles = (files = []) => {
+    console.log('add Folder')
     // ensure `appDir` exists
     fs.ensureDirSync(appDir)
 
     // copy `files` recursively (ignore duplicate file names)
     files.forEach(file => {
+        console.log('file: ', file.name)
         const filePath = path.resolve(appDir, file.name)
 
         if (!fs.existsSync(filePath)) {

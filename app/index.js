@@ -7,7 +7,7 @@ const io = require('./main/io')
 // open a window
 const openWindow = () => {
     const win = new BrowserWindow({
-        width: 800,
+        width: 1600,
         height: 600,
         webPreferences: {
             nodeIntegration: true,
@@ -18,6 +18,8 @@ const openWindow = () => {
     // load `index.html` file
     win.loadFile(path.resolve(__dirname, 'render/html/index.html'))
 
+    //win.webContents.session.clearCache()
+    //win.webContents.reloadIgnoringCache()
     win.webContents.openDevTools()
 
     return win
@@ -45,8 +47,6 @@ app.on('activate', () => {
     }
 })
 
-/************************/
-
 // return list of files
 ipcMain.handle('app:get-files', () => {
     return io.getFiles()
@@ -56,24 +56,6 @@ ipcMain.handle('app:get-files', () => {
 ipcMain.handle('app:on-file-add', (event, files = []) => {
     io.addFiles(files)
 })
-
-// open filesystem dialog to choose files
-ipcMain.handle('app:on-fs-dialog-open', event => {
-    const files = dialog.showOpenDialogSync({
-        properties: ['openFile', 'multiSelections']
-    })
-
-    io.addFiles(
-        files.map(filepath => {
-            return {
-                name: path.parse(filepath).base,
-                path: filepath
-            }
-        })
-    )
-})
-
-/*-----*/
 
 // listen to file delete event
 ipcMain.on('app:on-file-delete', (event, file) => {

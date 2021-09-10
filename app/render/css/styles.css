@@ -31,7 +31,6 @@ body {
         width: 90px; }
       .app__uploader__icon-area__text {
         font-size: 14px;
-        text-transform: uppercase;
         letter-spacing: 0.5px;
         font-weight: bold; }
     .app__uploader__button-area {

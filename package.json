@@ -5,7 +5,7 @@
   "main": "app/index.js",
   "scripts": {
     "start": "electron .",
-    "sass:build": "node-sass app/scss -o app/css",
+    "sass:build": "node-sass app/render/scss/styles.scss -o app/render/css",
     "sass:watch": "node-sass -w app/render/scss -o app/render/css"
   },
   "keywords": [ "Electron", "Catagen"],

@@ -4,14 +4,10 @@ const fs = require('fs-extra')
 const os = require('os')
 const open = require('open')
 const chokidar = require('chokidar')
-
-// local dependencies
 const notification = require('./notification')
 
 // get application directory
 const appDir = path.resolve(os.homedir(), 'electron-app-files')
-
-/****************************/
 
 // get the list of files
 exports.getFiles = () => {
@@ -28,8 +24,6 @@ exports.getFiles = () => {
         }
     })
 }
-
-/****************************/
 
 // add files
 exports.addFiles = (files = []) => {
@@ -71,11 +65,14 @@ exports.openFile = filename => {
     }
 }
 
-/*-----*/
-
 // watch files from the application's storage directory
 exports.watchFiles = win => {
     chokidar.watch(appDir).on('unlink', filepath => {
         win.webContents.send('app:delete-file', path.parse(filepath).base)
     })
+}
+
+exports.analyzeUploadDirectory = dirPath => {
+    const dirStat = fs.statSync(dirPath)
+    console.log('dirStat: ', dirStat)
 }

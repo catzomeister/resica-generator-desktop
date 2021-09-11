@@ -4,7 +4,7 @@
 
 html,
 body {
-    background-color: #eee;
+    background-color: white;
     font-family: 'Lato', sans-serif;
     font-size: 14px;
     padding: 0;
@@ -22,6 +22,7 @@ body {
         width: 50vw;
         display: flex;
         flex-direction: column;
+        background-color: #ddd;
 
         &--activate {
             opacity: 0.5;
@@ -128,7 +129,6 @@ body {
     &__preview {
         flex: 0 0 auto;
         width: 50vw;
-        background-color: #ddd;
         padding: 20px;
         overflow-x: hidden;
         overflow-y: auto;
@@ -137,6 +137,8 @@ body {
             display: flex;
             flex-direction: column;
             align-items: center;
+            height: 100%;
+            justify-content: center;
         }
 
         &__title {

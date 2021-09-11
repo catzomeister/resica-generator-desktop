@@ -9,6 +9,7 @@ const openWindow = () => {
     const win = new BrowserWindow({
         width: 1600,
         height: 600,
+        //resizable: false,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
@@ -16,6 +17,7 @@ const openWindow = () => {
     })
 
     // load `index.html` file
+    win.setMenuBarVisibility(false)
     win.loadFile(path.resolve(__dirname, 'render/html/index.html'))
 
     //win.webContents.session.clearCache()

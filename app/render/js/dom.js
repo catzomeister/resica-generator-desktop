@@ -34,7 +34,7 @@ window.openFile = function (itemId) {
 
 exports.displayFiles = (files = []) => {
     const fileListElem = document.getElementById('filelist')
-    fileListElem.innerHTML = ''
+    //fileListElem.innerHTML = ''
 
     files.forEach(file => {
         const itemDomElem = document.createElement('div')

@@ -21,13 +21,29 @@
                 <img src="../assets/upload.svg" class="app__uploader__icon-area__icon" alt="upload" />
                 <p class="app__uploader__icon-area__text">Seleccione directorio de catálogo</p>
             </div>
-            <div id="notif-area" class="app__uploader__notif-area">
-                <div id="notif-msg"></div>
-            </div>
         </div>
 
         <!-- file list -->
-        <div id="filelist" class="app__files"></div>
+        <div id="preview" class="app__preview">
+            <div id="catalog-resume" class="app__preview__catalog-resume">
+                <div class="app__preview__title"><div id="title-text"></div></div>
+                <div class="app__preview__company-name"><div id="company-text"></div></div>
+                <div class="app__preview__version"><div id="version-text"></div></div>
+                <div class="app__preview__logo-container">
+                    <img
+                        id="logo-img"
+                        class="app__preview__logo"
+                        src="/home/catzomeister/Documents/CATALOGOS/Mi Cuadro/company-logo.png"
+                        alt="logo"
+                    />
+                </div>
+                <div class="app__preview__copyright"><div id="copyright-text"></div></div>
+                <div class="app__preview__print"><button class="app__preview__print-button">Imprimir</button></div>
+            </div>
+            <div id="notification-area" class="app__preview__notif-area">
+                <div class="app__preview__notif-frame"><div id="notification-text"></div></div>
+            </div>
+        </div>
 
         <!-- require render JavaScript -->
         <script>

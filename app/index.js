@@ -19,8 +19,6 @@ const openWindow = () => {
     win.setMenuBarVisibility(false)
     win.loadFile(path.resolve(__dirname, 'render/html/index.html'))
 
-    //win.webContents.session.clearCache()
-    //win.webContents.reloadIgnoringCache()
     win.webContents.openDevTools()
 
     return win
@@ -29,9 +27,6 @@ const openWindow = () => {
 // when app is ready, open a window
 app.on('ready', () => {
     openWindow()
-
-    // watch files
-    //io.watchFiles(win)
 })
 
 // when all windows are closed, quit the app
@@ -47,31 +42,6 @@ app.on('activate', () => {
         openWindow()
     }
 })
-
-/* 
-ipcMain.handle('app:get-files', () => {
-    return io.getFiles()
-})
-
-ipcMain.handle('app:on-file-add', (event, files = []) => {
-    io.addFiles(files)
-})
-
-ipcMain.on('app:on-file-delete', (event, file) => {
-    io.deleteFile(file.filepath)
-})
-
-ipcMain.on('app:on-file-open', (event, file) => {
-    io.openFile(file.filepath)
-})
-
-ipcMain.on('app:on-file-copy', (event, file) => {
-    event.sender.startDrag({
-        file: file.filepath,
-        icon: path.resolve(__dirname, './resources/paper.png')
-    })
-})
- */
 
 ipcMain.handle('app:generate-pdf-catalog', (event, catalogDirectory, selectedVersion) => {
     console.log('catalogDirectory: ', catalogDirectory)

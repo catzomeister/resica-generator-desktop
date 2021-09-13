@@ -247,7 +247,7 @@ function createDocumentComponents(catalogDirectory, selectedVersion) {
     const info = loadInfo(infoMeta)
     const coverPage = getCoverPage(companyTree, selectedVersion, info)
     const doc = new PDFDocument({ size: 'A4' })
-    doc.pipe(fs.createWriteStream(`/home/catzomeister/Documents/CATALOGOS/${coverPage.title.text} ${coverPage.company.text} ${coverPage.version.text}.pdf`))
+    doc.pipe(fs.createWriteStream(`${catalogDirectory}/${coverPage.title.text} ${coverPage.company.text} ${coverPage.version.text}.pdf`))
     const printCoverPage = getCoverPagePrinter(doc, coverPage)
     const printText = getTextPrinter(doc)
     const printCatalogBody = getCatalogBodyPrinter(doc, companyTree, info)

@@ -3,7 +3,6 @@ const { ipcRenderer } = require('electron')
 const { stat, readdir, readFile } = require('fs/promises')
 const fs = require('fs')
 const path = require('path')
-const dom = require('./dom')
 
 document.getElementById('preview').style.display = 'none'
 

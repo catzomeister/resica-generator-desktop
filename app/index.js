@@ -1,8 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 
-// local dependencies
-const io = require('./main/io')
+const { createDocumentComponents } = require('./main/pdf/printers')
 
 // open a window
 const openWindow = () => {
@@ -29,10 +28,10 @@ const openWindow = () => {
 
 // when app is ready, open a window
 app.on('ready', () => {
-    const win = openWindow()
+    openWindow()
 
     // watch files
-    io.watchFiles(win)
+    //io.watchFiles(win)
 })
 
 // when all windows are closed, quit the app
@@ -49,30 +48,38 @@ app.on('activate', () => {
     }
 })
 
-// return list of files
+/* 
 ipcMain.handle('app:get-files', () => {
     return io.getFiles()
 })
 
-// listen to file(s) add event
 ipcMain.handle('app:on-file-add', (event, files = []) => {
     io.addFiles(files)
 })
 
-// listen to file delete event
 ipcMain.on('app:on-file-delete', (event, file) => {
     io.deleteFile(file.filepath)
 })
 
-// listen to file open event
 ipcMain.on('app:on-file-open', (event, file) => {
     io.openFile(file.filepath)
 })
 
-// listen to file copy event
 ipcMain.on('app:on-file-copy', (event, file) => {
     event.sender.startDrag({
         file: file.filepath,
         icon: path.resolve(__dirname, './resources/paper.png')
     })
+})
+ */
+
+ipcMain.handle('app:generate-pdf-catalog', (event, catalogDirectory, selectedVersion) => {
+    console.log('catalogDirectory: ', catalogDirectory)
+    console.log('selectedVersion: ', selectedVersion)
+    const { printCoverPage, printCatalogBody, printEof } = createDocumentComponents(catalogDirectory, selectedVersion)
+    printCoverPage()
+    printCatalogBody()
+    printEof()
+
+    return true
 })

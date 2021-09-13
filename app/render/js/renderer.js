@@ -7,17 +7,9 @@ const dom = require('./dom')
 
 document.getElementById('preview').style.display = 'none'
 
-// get list of files from the `main` process
-ipcRenderer.invoke('app:get-files').then((files = []) => {
-    dom.displayFiles(files)
-})
+let currentCatalogDirectory = ''
+let currentVersion = ''
 
-// handle file delete event
-ipcRenderer.on('app:delete-file', (event, filename) => {
-    document.getElementById(filename).remove()
-})
-
-// add files drop listener
 dragDrop('#uploader', (files, pos, fileList, directories) => {
     console.log('fileList', fileList)
     console.log('directories', directories)
@@ -35,11 +27,15 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
             validateCatagenDirectory(_path).then(info => {
                 if (info) {
                     showPreviewInfo(info, _version)
+                    currentVersion = _version
+                    currentCatalogDirectory = path.dirname(_path)
                 } else {
                     document.getElementById('preview').style.display = 'block'
                     document.getElementById('catalog-resume').style.display = 'none'
                     document.getElementById('notification-area').style.display = 'block'
                     notifMsg.innerText = 'Its a invalid directory'
+                    currentCatalogDirectory = ''
+                    currentVersion = ''
                 }
             })
         } else {
@@ -47,17 +43,10 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
             document.getElementById('catalog-resume').style.display = 'none'
             document.getElementById('notification-area').style.display = 'block'
             notifMsg.innerText = 'Its not a directory'
+            currentCatalogDirectory = ''
+            currentVersion = ''
         }
     })
-
-    // send file(s) add event to the `main` process
-    /*
-    ipcRenderer.invoke('app:on-file-add', _files).then(() => {
-        ipcRenderer.invoke('app:get-files').then((__files = []) => {
-            dom.displayFiles(__files)
-        })
-    })
-    */
 })
 
 function validateCatagenDirectory(_path) {
@@ -69,12 +58,7 @@ function validateCatagenDirectory(_path) {
             const info = loadInfo(path.resolve(parentDirectory, 'info.json'))
             info.logoPath = path.resolve(parentDirectory, 'company-logo.png')
             return info
-            /* if (info) {
-                showInfo(info)
-                return true
-            } */
         }
-        //return false
     })
 }
 
@@ -95,4 +79,20 @@ function showPreviewInfo(info, version) {
     document.getElementById('preview').style.display = 'block'
     document.getElementById('catalog-resume').style.display = 'flex'
     document.getElementById('notification-area').style.display = 'none'
+}
+
+window.printPdf = () => {
+    console.log('Generando PDF')
+
+    ipcRenderer.invoke('app:generate-pdf-catalog', currentCatalogDirectory, currentVersion).then(success => {
+        const notifMsg = document.getElementById('notification-text')
+        document.getElementById('preview').style.display = 'block'
+        document.getElementById('catalog-resume').style.display = 'none'
+        document.getElementById('notification-area').style.display = 'block'
+        if (success) {
+            notifMsg.innerText = 'Pdf generado exitosamente'
+        } else {
+            notifMsg.innerText = 'Pdf no generado'
+        }
+    })
 }

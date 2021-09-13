@@ -1,2 +1,2 @@
-# Catagen GUI
-GUI for Catagen made with Electron
+# Resica Generator Desktop
+GUI for catalog generator made with Electron

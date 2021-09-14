@@ -20,8 +20,6 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
     stat(_path).then(s => {
         console.log('isDirectory? ', s.isDirectory())
 
-        const notifMsg = document.getElementById('notification-text')
-
         if (s.isDirectory()) {
             validateCatagenDirectory(_path).then(info => {
                 if (info) {
@@ -29,19 +27,13 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                     currentVersion = _version
                     currentCatalogDirectory = path.dirname(_path)
                 } else {
-                    document.getElementById('preview').style.display = 'block'
-                    document.getElementById('catalog-resume').style.display = 'none'
-                    document.getElementById('notification-area').style.display = 'block'
-                    notifMsg.innerText = 'Its a invalid directory'
+                    showNotification('El directorio seleccionado no es de tipo catálogo')
                     currentCatalogDirectory = ''
                     currentVersion = ''
                 }
             })
         } else {
-            document.getElementById('preview').style.display = 'block'
-            document.getElementById('catalog-resume').style.display = 'none'
-            document.getElementById('notification-area').style.display = 'block'
-            notifMsg.innerText = 'Its not a directory'
+            showNotification('El elemento seleccionado no es un directorio')
             currentCatalogDirectory = ''
             currentVersion = ''
         }
@@ -68,6 +60,17 @@ function loadInfo(infoPath) {
     }
 }
 
+function showNotification(message) {
+    const notifMsg = document.getElementById('notification-text')
+    const notifAct = document.getElementById('notification-action')
+    document.getElementById('preview').style.display = 'block'
+    document.getElementById('catalog-resume').style.display = 'none'
+    document.getElementById('notification-area').style.display = 'flex'
+    notifMsg.innerText = message
+    notifAct.innerText = ''
+    //notifAct.innerHTML = `Seleccione otro directorio o <a href="#">cree una estructura de ejemplo</a>`
+}
+
 function showPreviewInfo(info, version) {
     console.log('info: ', info)
     document.getElementById('title-text').innerText = info.title
@@ -87,11 +90,11 @@ window.printPdf = () => {
         const notifMsg = document.getElementById('notification-text')
         document.getElementById('preview').style.display = 'block'
         document.getElementById('catalog-resume').style.display = 'none'
-        document.getElementById('notification-area').style.display = 'block'
+        document.getElementById('notification-area').style.display = 'flex'
         if (success) {
-            notifMsg.innerText = 'Pdf generado exitosamente'
+            notifMsg.innerText = 'Catálogo PDF generado exitosamente'
         } else {
-            notifMsg.innerText = 'Pdf no generado'
+            notifMsg.innerText = 'Catálogo PDF no generado'
         }
     })
 }

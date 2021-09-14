@@ -41,9 +41,8 @@ body {
             }
 
             &__text {
-                font-size: 14px;
+                font-size: 18px;
                 letter-spacing: 0.5px;
-                font-weight: bold;
             }
         }
 
@@ -63,64 +62,6 @@ body {
                 border-radius: 3px;
                 overflow: hidden;
                 cursor: pointer;
-            }
-        }
-    }
-
-    // files
-    &__files {
-        flex: 0 0 auto;
-        width: 50vw;
-        background-color: #ddd;
-        padding: 20px;
-        overflow-x: hidden;
-        overflow-y: auto;
-
-        &__item {
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-
-            &__file {
-                flex: 0 0 auto;
-                width: 20px;
-            }
-
-            &__info {
-                flex: 1 1 auto;
-                margin: 0 20px;
-                overflow: hidden;
-
-                &__name {
-                    font-size: 14px;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
-                    margin: 0;
-                }
-
-                &__size {
-                    font-size: 12px;
-                    color: #666;
-                    margin: 0;
-                }
-            }
-
-            &__delete {
-                flex: 0 0 auto;
-                width: 16px;
-                cursor: pointer;
-            }
-
-            &__open {
-                flex: 0 0 auto;
-                width: 16px;
-                margin-left: 10px;
-                cursor: pointer;
-            }
-
-            &:not(:last-child) {
-                margin-bottom: 20px;
             }
         }
     }
@@ -199,6 +140,31 @@ body {
             font-size: 16px;
             margin: 4px 2px;
             cursor: pointer;
+        }
+
+        &__notif-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: center;
+        }
+
+        &__notif-frame {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        &__notif-text {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        &__notif-action {
+            text-align: center;
+            font-size: 18px;
         }
     }
 }

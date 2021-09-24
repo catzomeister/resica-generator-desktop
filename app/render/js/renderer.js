@@ -4,7 +4,9 @@ const { stat, readdir, readFile } = require('fs/promises')
 const fs = require('fs')
 const path = require('path')
 
-document.getElementById('preview').style.display = 'none'
+document.getElementById('workspace').style.display = 'none'
+document.getElementById('uploaderFileName').style.display = 'none'
+document.getElementById('uploaderWallArt').style.display = 'none'
 
 let currentCatalogDirectory = ''
 let currentVersion = ''
@@ -13,18 +15,17 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
     console.log('fileList', fileList)
     console.log('directories', directories)
 
-    const _version = fileList[0].name
+    const _fsItemName = fileList[0].name
     const _path = fileList[0].path
-    console.log('f0: ', _path)
+    console.log('f0 version: ', _fsItemName)
+    console.log('f0 path: ', _path)
 
     stat(_path).then(s => {
-        console.log('isDirectory? ', s.isDirectory())
-
         if (s.isDirectory()) {
             validateCatagenDirectory(_path).then(info => {
                 if (info) {
-                    showPreviewInfo(info, _version)
-                    currentVersion = _version
+                    showPreviewInfo(info, _fsItemName)
+                    currentVersion = _fsItemName
                     currentCatalogDirectory = path.dirname(_path)
                 } else {
                     showNotification('El directorio seleccionado no es de tipo catálogo')
@@ -32,8 +33,12 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                     currentVersion = ''
                 }
             })
+        } else if (s.isFile()  && _fsItemName === 'info.json') {
+            showNotification('El elemento seleccionado es un archivo de configuración')
+            currentCatalogDirectory = ''
+            currentVersion = ''
         } else {
-            showNotification('El elemento seleccionado no es un directorio')
+            showNotification('El elemento seleccionado no es un directorio o archivo Resica')
             currentCatalogDirectory = ''
             currentVersion = ''
         }
@@ -63,7 +68,7 @@ function loadInfo(infoPath) {
 function showNotification(message) {
     const notifMsg = document.getElementById('notification-text')
     const notifAct = document.getElementById('notification-action')
-    document.getElementById('preview').style.display = 'block'
+    document.getElementById('workspace').style.display = 'block'
     document.getElementById('catalog-resume').style.display = 'none'
     document.getElementById('notification-area').style.display = 'flex'
     notifMsg.innerText = message
@@ -78,7 +83,7 @@ function showPreviewInfo(info, version) {
     document.getElementById('version-text').innerText = version
     document.getElementById('logo-img').src = info.logoPath
     document.getElementById('copyright-text').src = `© ${info.company} ${new Date().getFullYear()}`
-    document.getElementById('preview').style.display = 'block'
+    document.getElementById('workspace').style.display = 'block'
     document.getElementById('catalog-resume').style.display = 'flex'
     document.getElementById('notification-area').style.display = 'none'
 }
@@ -88,7 +93,7 @@ window.printPdf = () => {
 
     ipcRenderer.invoke('app:generate-pdf-catalog', currentCatalogDirectory, currentVersion).then(success => {
         const notifMsg = document.getElementById('notification-text')
-        document.getElementById('preview').style.display = 'block'
+        document.getElementById('workspace').style.display = 'block'
         document.getElementById('catalog-resume').style.display = 'none'
         document.getElementById('notification-area').style.display = 'flex'
         if (success) {

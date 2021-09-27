@@ -29,7 +29,7 @@
             </div>
         </div>
 
-        <!-- file list -->
+        <!-- workspace area -->
         <div id="workspace" class="app__workspace">
             <div id="catalog-resume" class="app__workspace__catalog-resume">
                 <div class="app__workspace__title"><div id="title-text"></div></div>
@@ -45,6 +45,79 @@
                 </div>
                 <div class="app__workspace__copyright"><div id="copyright-text"></div></div>
                 <div class="app__workspace__print"><button onclick="printPdf()" class="app__workspace__print-button">Imprimir</button></div>
+            </div>
+            <div id="catalog-form" class="app__workspace__catalog-form">
+                <form>
+                    <div id="configForm" class="formBackground">
+                        <div class="titleHeader">Configuración General</div>
+                        <label for="title">Título</label>
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            placeholder="Título del documento"
+                        />
+                        <label for="company">Empresa</label>
+                        <input
+                            type="text"
+                            id="company"
+                            name="company"
+                            placeholder="Nombre de la empresa"
+                        />
+                        <label for="whatsapp">Whatsapp</label>
+                        <input
+                            type="text"
+                            id="whatsapp"
+                            name="whatsapp"
+                            placeholder="Número de teléfono"
+                        />
+                        <label for="instagram">Instagram</label>
+                        <input
+                            type="text"
+                            id="instagram"
+                            name="instagram"
+                            placeholder="Cuenta de Instagram"
+                        />
+                        <fieldset class="checkboxList">
+                            <legend>Opciones de Impresión</legend>
+                            <div>
+                                <input type="checkbox" id="showCode" name="showCode" />
+                                <label for="showCode">Mostrar código</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="showName" name="showName" />
+                                <label for="showName">Mostrar nombre</label>
+                            </div>
+                            <div>
+                                <input
+                                    type="checkbox"
+                                    id="showDescription"
+                                    name="showDescription"
+                                />
+                                <label for="showDescription">Mostrar descripción</label>
+                            </div>
+                            <div>
+                                <input
+                                    type="checkbox"
+                                    id="showPrices"
+                                    name="showPrices"
+                                />
+                                <label for="showPrices">Mostrar precios</label>
+                            </div>
+                            <div>
+                                <input
+                                    type="checkbox"
+                                    id="showObservations"
+                                    name="showObservations"
+                                />
+                                <label for="showObservations"
+                                    >Mostrar observaciones</label
+                                >
+                            </div>
+                        </fieldset>
+                    </div>
+                    <input type="submit" value="Guardar" />
+                </form>
             </div>
             <div id="notification-area" class="app__workspace__notif-area">
                 <div class="app__workspace__notif-frame">

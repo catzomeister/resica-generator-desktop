@@ -8,7 +8,7 @@ const openWindow = () => {
     const win = new BrowserWindow({
         width: 1600,
         height: 600,
-        //resizable: false,
+        //resizable: false,c
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false

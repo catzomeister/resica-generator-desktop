@@ -237,8 +237,8 @@ input[type="text"]:focus, textarea:focus {
     background-color: lightblue;
 }
 
-input[type="submit"] {
-    font-size: large;
+.formSave {
+    font-size: medium;
     font-weight: bold;
     width: 100%;
     background-color: #4caf50;
@@ -250,7 +250,7 @@ input[type="submit"] {
     cursor: pointer;
 }
 
-input[type="submit"]:hover {
+.formSave:hover {
     background-color: #45a049;
 }
 

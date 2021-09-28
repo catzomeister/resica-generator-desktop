@@ -15,23 +15,23 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
     console.log('fileList', fileList)
     console.log('directories', directories)
 
-    const _fsItemName = fileList[0].name
-    const _path = fileList[0].path
-    console.log('f0 version: ', _fsItemName)
-    console.log('f0 path: ', _path)
+    const fsItemName = fileList[0].name
+    const fsItemPath = fileList[0].path
+    console.log('f0 version: ', fsItemName)
+    console.log('f0 path: ', fsItemPath)
 
-    const root = path.parse(_path).root
+    const root = path.parse(fsItemPath).root
 
-    stat(_path).then(s => {
+    stat(fsItemPath).then(s => {
         if (s.isDirectory()) {
             // Version Directory
-            validateResicaDirectory(_path, 'version')
+            validateResicaDirectory(fsItemPath, 'version')
                 .then(info => {
                     console.log('*** VERSION BLOCK ***', info)
                     if (info) {
-                        showPreviewInfo(info, _fsItemName)
-                        currentVersion = _fsItemName
-                        currentCatalogDirectory = path.dirname(_path)
+                        showPreviewInfo(info, fsItemName)
+                        currentVersion = fsItemName
+                        currentCatalogDirectory = path.dirname(fsItemPath)
                         return true
                     } /* else {
                     showNotification('El directorio seleccionado no es de tipo catálogo')
@@ -42,11 +42,11 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                 })
                 .then(isResicaDirectory => {
                     if (!isResicaDirectory) {
-                        return validateResicaDirectory(_path, 'company').then(info => {
+                        return validateResicaDirectory(fsItemPath, 'company').then(info => {
                             console.log('*** COMPANY BLOCK ***', info)
                             if (info) {
                                 showGeneralConfiguration(info)
-                                currentCatalogDirectory = ''
+                                currentCatalogDirectory = fsItemPath
                                 currentVersion = ''
                                 return true
                             }
@@ -59,10 +59,10 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                 })
                 .then(isResicaDirectory => {
                     if (!isResicaDirectory) {
-                        return validateResicaDirectory(_path, 'category', 0, root).then(info => {
+                        return validateResicaDirectory(fsItemPath, 'category', 0, root).then(info => {
                             console.log('*** CATEGORY BLOCK ***', info)
                             if (info) {
-                                return readdir(_path).then(images => {
+                                return readdir(fsItemPath).then(images => {
                                     currentCatalogDirectory = info.currentCatalogDirectory
                                     currentVersion = info.currentVersion
                                     showImagesList(images)
@@ -85,31 +85,34 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                         currentVersion = ''
                     }
                 })
-        } else if (s.isFile() && _fsItemName === 'info.json') {
-            const info = loadInfo(_path)
+        } else if (s.isFile() && fsItemName === 'info.json') {
+            const info = loadInfo(fsItemPath)
             console.log('INFO: ', info)
             showGeneralConfiguration(info)
             currentCatalogDirectory = ''
             currentVersion = ''
-        } else if (s.isFile() && (_fsItemName.endsWith('.jpg') || _fsItemName.endsWith('.png'))) {
+        } else if (s.isFile() && (fsItemName.endsWith('.jpg') || fsItemName.endsWith('.png'))) {
             // la imagen debe encontrarse dentro de un category directory
-            validateResicaDirectory(_path, 'category', 0, root).then(info => {
-                console.log('*** IMAGE BLOCK ***', info)
-                if (info) {
-                    currentCatalogDirectory = info.currentCatalogDirectory
-                    currentVersion = info.currentVersion
-                    console.log('IMAGE PARTY: ', _fsItemName)
-                    return true
-                }
+            validateResicaDirectory(fsItemPath, 'category', 0, root)
+                .then(info => {
+                    console.log('*** IMAGE BLOCK ***', info)
+                    if (info) {
+                        currentCatalogDirectory = info.currentCatalogDirectory
+                        currentVersion = info.currentVersion
+                        console.log('IMAGE PARTY: ', fsItemName)
+                        showProductInfo(fsItemName, fsItemPath)
+                        return true
+                    }
 
-                return false
-            }).then(isResicaDirectory => {
-                if (!isResicaDirectory) {
-                    showNotification('El elemento seleccionado no es un directorio o archivo Resica')
-                    currentCatalogDirectory = ''
-                    currentVersion = ''
-                }
-            })
+                    return false
+                })
+                .then(isResicaDirectory => {
+                    if (!isResicaDirectory) {
+                        showNotification('El elemento seleccionado no es un directorio o archivo Resica')
+                        currentCatalogDirectory = ''
+                        currentVersion = ''
+                    }
+                })
         } else {
             showNotification('El elemento seleccionado no es un directorio o archivo Resica')
             currentCatalogDirectory = ''
@@ -209,6 +212,37 @@ function showGeneralConfiguration(info) {
     document.getElementById('showObservations').checked = !!info.fields.showObservations
 
     console.log('showPrices: ', document.getElementById('showPrices').value)
+}
+
+function showProductInfo(itemName, itemPath) {
+    document.getElementById('uploaderFileName').style.display = 'flex'
+    document.getElementById('uploaderWallArt').style.display = 'flex'
+    document.getElementById('uploaderFileName').innerText = itemName
+    document.getElementById('itemImg').scr = itemPath
+}
+
+window.saveConfiguration = () => {
+    console.log('saveConfiguration()')
+    const configuration = {
+        title: document.getElementById('title').value,
+        company: document.getElementById('company').value,
+        whatsapp: document.getElementById('whatsapp').value,
+        instagram: document.getElementById('instagram').value,
+        fields: {
+            showCode: !!document.getElementById('showCode').checked,
+            showName: !!document.getElementById('showName').checked,
+            showDescription: !!document.getElementById('showDescription').checked,
+            showPrices: !!document.getElementById('showPrices').checked,
+            showObservations: !!document.getElementById('showObservations').checked
+        }
+    }
+    fs.writeFileSync(path.resolve(currentCatalogDirectory, 'info.json'), JSON.stringify(configuration, null, 2), {
+        encoding: 'utf8',
+        flag: 'w'
+    })
+
+    event.preventDefault()
+    showNotification('La configuración se guardó exitosamente')
 }
 
 window.printPdf = () => {

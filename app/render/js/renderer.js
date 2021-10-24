@@ -3,10 +3,9 @@ const { ipcRenderer } = require('electron')
 const { stat, readdir, readFile } = require('fs/promises')
 const fs = require('fs')
 const path = require('path')
+const dom = require('./resicaDom')
 
-document.getElementById('workspace').style.display = 'none'
-document.getElementById('uploaderFileName').style.display = 'none'
-document.getElementById('uploaderWallArt').style.display = 'none'
+displayInitialScreen()
 
 let currentCatalogDirectory = ''
 let currentVersion = ''
@@ -169,10 +168,10 @@ function loadInfo(infoPath) {
 function showNotification(message) {
     const notifMsg = document.getElementById('notification-text')
     const notifAct = document.getElementById('notification-action')
-    document.getElementById('workspace').style.display = 'block'
-    document.getElementById('catalog-resume').style.display = 'none'
-    document.getElementById('catalog-form').style.display = 'none'
-    document.getElementById('notification-area').style.display = 'flex'
+    dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
+        .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'catalog-form'])
+        .setStyleDisplay(dom.DISPLAY_FLEX, ['notification-area'])
+
     notifMsg.innerText = message
     notifAct.innerText = ''
     //notifAct.innerHTML = `Seleccione otro directorio o <a href="#">cree una estructura de ejemplo</a>`
@@ -183,57 +182,56 @@ function showImagesList(images) {
     console.log('images: ', images)
 }
 
+function displayInitialScreen() {
+    dom.setStyleDisplay(dom.DISPLAY_NONE, dom.INITIAL_STATUS)
+}
+
 function showPreviewInfo(info, version) {
     console.log('info: ', info)
-    document.getElementById('title-text').innerText = info.title
-    document.getElementById('company-text').innerText = info.company
-    document.getElementById('version-text').innerText = version
-    document.getElementById('logo-img').src = info.logoPath
-    document.getElementById('copyright-text').src = `© ${info.company} ${new Date().getFullYear()}`
-    document.getElementById('workspace').style.display = 'block'
-    document.getElementById('catalog-resume').style.display = 'flex'
-    document.getElementById('catalog-form').style.display = 'none'
-    document.getElementById('notification-area').style.display = 'none'
+    dom.setInnerText(info.title, ['title'])
+        .setInnerText(info.company, ['company-text'])
+        .setInnerText(version, ['version-text'])
+        .setScr(info.logoPath, ['logo-img'])
+        .setScr(`© ${info.company} ${new Date().getFullYear()}`, ['copyright-text'])
+        .setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
+        .setStyleDisplay(dom.DISPLAY_FLEX, ['catalog-resume'])
+        .setStyleDisplay(dom.DISPLAY_NONE, ['notification-area', 'catalog-form'])
 }
 
 function showGeneralConfiguration(info) {
-    document.getElementById('workspace').style.display = 'block'
-    document.getElementById('catalog-resume').style.display = 'none'
-    document.getElementById('notification-area').style.display = 'none'
-    document.getElementById('catalog-form').style.display = 'block'
-    document.getElementById('title').value = info.title
-    document.getElementById('company').value = info.company
-    document.getElementById('whatsapp').value = info.whatsapp
-    document.getElementById('instagram').value = info.instagram
-    document.getElementById('showCode').checked = !!info.fields.showCode
-    document.getElementById('showName').checked = !!info.fields.showName
-    document.getElementById('showDescription').checked = !!info.fields.showDescription
-    document.getElementById('showPrices').checked = !!info.fields.showPrices
-    document.getElementById('showObservations').checked = !!info.fields.showObservations
-
+    dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace', 'catalog-form'])
+        .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'notification-area'])
+        .setValue(info.title, ['title'])
+        .setValue(info.company, ['company'])
+        .setValue(info.whatsapp, ['whatsapp'])
+        .setValue(info.instagram, ['instagram'])
+        .setChecked(!!info.fields.showCode, ['showCode'])
+        .setChecked(!!info.fields.showName, ['showName'])
+        .setChecked(!!info.fields.showDescription, ['showDescription'])
+        .setChecked(!!info.fields.showPrices, ['showPrices'])
+        .setChecked(!!info.fields.showObservations, ['showObservations'])
     console.log('showPrices: ', document.getElementById('showPrices').value)
 }
 
 function showProductInfo(itemName, itemPath) {
-    document.getElementById('uploaderFileName').style.display = 'flex'
-    document.getElementById('uploaderWallArt').style.display = 'flex'
-    document.getElementById('uploaderFileName').innerText = itemName
-    document.getElementById('itemImg').scr = itemPath
+    dom.setStyleDisplay(dom.DISPLAY_FLEX, ['uploaderFileName', 'uploaderWallArt'])
+        .setInnerText(itemName, ['uploaderFileName'])
+        .setScr(itemPath, ['itemImg'])
 }
 
 window.saveConfiguration = () => {
     console.log('saveConfiguration()')
     const configuration = {
-        title: document.getElementById('title').value,
-        company: document.getElementById('company').value,
-        whatsapp: document.getElementById('whatsapp').value,
-        instagram: document.getElementById('instagram').value,
+        title: dom.getValue('title'), 
+        company: dom.getValue('company'), 
+        whatsapp: dom.getValue('whatsapp'), 
+        instagram: dom.getValue('instagram'), 
         fields: {
-            showCode: !!document.getElementById('showCode').checked,
-            showName: !!document.getElementById('showName').checked,
-            showDescription: !!document.getElementById('showDescription').checked,
-            showPrices: !!document.getElementById('showPrices').checked,
-            showObservations: !!document.getElementById('showObservations').checked
+            showCode: !!dom.getChecked('showCode'), 
+            showName: !!dom.getChecked('showName'), 
+            showDescription: !!dom.getChecked('showDescription'), 
+            showPrices: !!dom.getChecked('showPrices'), 
+            showObservations: !!dom.getChecked('showObservations') 
         }
     }
     fs.writeFileSync(path.resolve(currentCatalogDirectory, 'info.json'), JSON.stringify(configuration, null, 2), {
@@ -250,9 +248,11 @@ window.printPdf = () => {
 
     ipcRenderer.invoke('app:generate-pdf-catalog', currentCatalogDirectory, currentVersion).then(success => {
         const notifMsg = document.getElementById('notification-text')
-        document.getElementById('workspace').style.display = 'block'
-        document.getElementById('catalog-resume').style.display = 'none'
-        document.getElementById('notification-area').style.display = 'flex'
+
+        dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
+            .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume'])
+            .setStyleDisplay(dom.DISPLAY_FLEX, ['notification-area'])
+
         if (success) {
             notifMsg.innerText = 'Catálogo PDF generado exitosamente'
         } else {

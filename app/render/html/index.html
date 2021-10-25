@@ -17,9 +17,7 @@
     <body class="app">
         <!-- upload area -->
         <div id="uploader" class="app__uploader">
-            <div id="uploaderFileName" class="app__uploader__file-name">
-                MC-CUA-COC-001.jpg
-            </div>
+            <div id="uploaderFileName" class="app__uploader__file-name">MC-CUA-COC-001.jpg</div>
             <div id="uploaderWallArt" class="app__uploader__wall-art">
                 <img id="itemImg" src="../assets/MC-CUA-COC-001.jpg" alt="wall-art" />
             </div>
@@ -44,40 +42,22 @@
                     />
                 </div>
                 <div class="app__workspace__copyright"><div id="copyright-text"></div></div>
-                <div class="app__workspace__print"><button onclick="printPdf()" class="app__workspace__print-button">Imprimir</button></div>
+                <div class="app__workspace__print">
+                    <button onclick="printPdf()" class="app__workspace__print-button">Imprimir</button>
+                </div>
             </div>
             <div id="catalog-form" class="app__workspace__catalog-form">
                 <form id="configForm" onsubmit="saveConfiguration()" method="POST">
                     <div class="formBackground">
                         <div class="titleHeader">Configuración General</div>
                         <label for="title">Título</label>
-                        <input
-                            type="text"
-                            id="title"
-                            name="title"
-                            placeholder="Título del documento"
-                        />
+                        <input type="text" id="title" name="title" placeholder="Título del documento" />
                         <label for="company">Empresa</label>
-                        <input
-                            type="text"
-                            id="company"
-                            name="company"
-                            placeholder="Nombre de la empresa"
-                        />
+                        <input type="text" id="company" name="company" placeholder="Nombre de la empresa" />
                         <label for="whatsapp">Whatsapp</label>
-                        <input
-                            type="text"
-                            id="whatsapp"
-                            name="whatsapp"
-                            placeholder="Número de teléfono"
-                        />
+                        <input type="text" id="whatsapp" name="whatsapp" placeholder="Número de teléfono" />
                         <label for="instagram">Instagram</label>
-                        <input
-                            type="text"
-                            id="instagram"
-                            name="instagram"
-                            placeholder="Cuenta de Instagram"
-                        />
+                        <input type="text" id="instagram" name="instagram" placeholder="Cuenta de Instagram" />
                         <fieldset class="checkboxList">
                             <legend>Opciones de Impresión</legend>
                             <div>
@@ -89,34 +69,96 @@
                                 <label for="showName">Mostrar nombre</label>
                             </div>
                             <div>
-                                <input
-                                    type="checkbox"
-                                    id="showDescription"
-                                    name="showDescription"
-                                />
+                                <input type="checkbox" id="showDescription" name="showDescription" />
                                 <label for="showDescription">Mostrar descripción</label>
                             </div>
                             <div>
-                                <input
-                                    type="checkbox"
-                                    id="showPrices"
-                                    name="showPrices"
-                                />
+                                <input type="checkbox" id="showPrices" name="showPrices" />
                                 <label for="showPrices">Mostrar precios</label>
                             </div>
                             <div>
-                                <input
-                                    type="checkbox"
-                                    id="showObservations"
-                                    name="showObservations"
-                                />
-                                <label for="showObservations"
-                                    >Mostrar observaciones</label
-                                >
+                                <input type="checkbox" id="showObservations" name="showObservations" />
+                                <label for="showObservations">Mostrar observaciones</label>
                             </div>
                         </fieldset>
                     </div>
                     <input type="submit" value="Guardar" class="formSave" onclick="saveConfiguration()" />
+                </form>
+            </div>
+            <div id="item-form" class="app__workspace__item-form">
+                <form id="productForm" onsubmit="saveProduct()" method="POST">
+                    <div class="formBackground">
+                        <div class="titleHeader">Producto</div>
+                        <label for="code">Código</label>
+                        <input type="text" id="code" name="code" placeholder="Código del producto" readonly />
+                        <label for="name">Nombre</label>
+                        <input type="text" id="name" name="name" placeholder="Nombre del producto" />
+                        <label for="description">Descripción</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            placeholder="Descripción del producto"
+                        ></textarea>
+                        <fieldset class="pricesList">
+                            <legend>Precios</legend>
+                            <div class="priceContainer">
+                                <div>
+                                    <label for="size">Tamaño</label>
+                                    <input
+                                        type="text"
+                                        id="size"
+                                        name="size"
+                                        placeholder="Tamaño"
+                                    />
+                                </div>
+                                <div>
+                                    <label for="size">Precio</label>
+                                    <input
+                                        type="text"
+                                        id="price"
+                                        name="price"
+                                        placeholder="Precio"
+                                    />
+                                </div>
+                                <div class="priceControls">
+                                    <input
+                                        type="button"
+                                        value="Agregar"
+                                        style="background-color: #2196f3"
+                                        onclick="addPrice()"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <table id="pricesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Tamaño</th>
+                                            <th>Precio</th>
+                                            <th>Eliminar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                        <label for="observations">Observaciones</label>
+                        <input
+                            type="text"
+                            id="observations"
+                            name="observations"
+                            placeholder="Observaciones"
+                        />
+                        <input
+                            type="checkbox"
+                            id="active"
+                            name="active"
+                            style="margin-top: 10px; margin-bottom: 10px"
+                        />
+                        <span><label for="active">Activo</label></span>
+                    </div>
+                    <input type="button" value="Guardar" class="formSave" onclick="saveProduct()" />
                 </form>
             </div>
             <div id="notification-area" class="app__workspace__notif-area">

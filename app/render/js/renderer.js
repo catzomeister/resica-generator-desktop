@@ -1,9 +1,10 @@
 const dragDrop = require('drag-drop')
-const { ipcRenderer } = require('electron')
+const { ipcRenderer, remote } = require('electron')
 const { stat, readdir, readFile } = require('fs/promises')
 const fs = require('fs')
 const path = require('path')
 const dom = require('./resicaDom')
+const { electron } = require('process')
 
 displayInitialScreen()
 
@@ -169,7 +170,7 @@ function showNotification(message) {
     const notifMsg = document.getElementById('notification-text')
     const notifAct = document.getElementById('notification-action')
     dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
-        .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'catalog-form'])
+        .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'catalog-form', 'item-form'])
         .setStyleDisplay(dom.DISPLAY_FLEX, ['notification-area'])
 
     notifMsg.innerText = message
@@ -195,12 +196,12 @@ function showPreviewInfo(info, version) {
         .setScr(`© ${info.company} ${new Date().getFullYear()}`, ['copyright-text'])
         .setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
         .setStyleDisplay(dom.DISPLAY_FLEX, ['catalog-resume'])
-        .setStyleDisplay(dom.DISPLAY_NONE, ['notification-area', 'catalog-form'])
+        .setStyleDisplay(dom.DISPLAY_NONE, ['notification-area', 'catalog-form', 'item-form'])
 }
 
 function showGeneralConfiguration(info) {
     dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace', 'catalog-form'])
-        .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'notification-area'])
+        .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'notification-area', 'item-form'])
         .setValue(info.title, ['title'])
         .setValue(info.company, ['company'])
         .setValue(info.whatsapp, ['whatsapp'])
@@ -215,6 +216,8 @@ function showGeneralConfiguration(info) {
 
 function showProductInfo(itemName, itemPath) {
     dom.setStyleDisplay(dom.DISPLAY_FLEX, ['uploaderFileName', 'uploaderWallArt'])
+        .setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace', 'item-form'])
+        .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'notification-area', 'catalog-form'])
         .setInnerText(itemName, ['uploaderFileName'])
         .setScr(itemPath, ['itemImg'])
 }
@@ -222,16 +225,16 @@ function showProductInfo(itemName, itemPath) {
 window.saveConfiguration = () => {
     console.log('saveConfiguration()')
     const configuration = {
-        title: dom.getValue('title'), 
-        company: dom.getValue('company'), 
-        whatsapp: dom.getValue('whatsapp'), 
-        instagram: dom.getValue('instagram'), 
+        title: dom.getValue('title'),
+        company: dom.getValue('company'),
+        whatsapp: dom.getValue('whatsapp'),
+        instagram: dom.getValue('instagram'),
         fields: {
-            showCode: !!dom.getChecked('showCode'), 
-            showName: !!dom.getChecked('showName'), 
-            showDescription: !!dom.getChecked('showDescription'), 
-            showPrices: !!dom.getChecked('showPrices'), 
-            showObservations: !!dom.getChecked('showObservations') 
+            showCode: !!dom.getChecked('showCode'),
+            showName: !!dom.getChecked('showName'),
+            showDescription: !!dom.getChecked('showDescription'),
+            showPrices: !!dom.getChecked('showPrices'),
+            showObservations: !!dom.getChecked('showObservations')
         }
     }
     fs.writeFileSync(path.resolve(currentCatalogDirectory, 'info.json'), JSON.stringify(configuration, null, 2), {
@@ -259,4 +262,63 @@ window.printPdf = () => {
             notifMsg.innerText = 'Catálogo PDF no generado'
         }
     })
+}
+
+window.addPrice = (size = document.getElementById('size'), price = document.getElementById('price')) => {
+    if (!size.value || !price.value) {
+        remote.dialog.showErrorBox('Datos incorrectos', 'Debe ingresar el tamaño y el precio')
+        return
+    }
+
+    const pricesTable = document.getElementById('pricesTable')
+    console.log('pricesTable: ', pricesTable.rows)
+    const newPriceRow = pricesTable.insertRow(-1)
+    const newSize = newPriceRow.insertCell(0)
+    const newPrice = newPriceRow.insertCell(1)
+    const newRemove = newPriceRow.insertCell(2)
+    newSize.innerHTML = size.value
+    newPrice.innerHTML = price.value
+    newRemove.innerHTML = `<input type="button" value="Remover" style="background-color: #f44336" onclick="removePrice(${newPriceRow.rowIndex})" />`
+
+    const pricesData = []
+    for (let i = 1; i < pricesTable.rows.length; i++) {
+        const element = pricesTable.rows[i]
+        pricesData.push({
+            size: element.cells[0].innerText,
+            price: element.cells[1].innerText
+        })
+    }
+
+    console.log('pricesData: ', pricesData)
+}
+
+window.removePrice = index => {
+    const pricesTable = document.getElementById('pricesTable')
+    pricesTable.deleteRow(index)
+}
+
+window.saveProduct = () => {
+    const pricesData = []
+    for (let i = 1; i < pricesTable.rows.length; i++) {
+        const element = pricesTable.rows[i]
+        pricesData.push({
+            size: element.cells[0].innerText,
+            price: element.cells[1].innerText
+        })
+    }
+
+    const product = {
+        code: dom.getValue('code')
+        name: dom.getValue('name'),
+        description: dom.getValue('description'),
+        prices: pricesData,
+        observations: dom.getValue('observations'),
+        status: dom.getChecked('active') ? 'ACT' : 'INA'
+    }
+    console.log('saving product: ', product)
+    //read the file
+    //find the code
+    //delete the product
+    //save the new product
+    //order by name
 }

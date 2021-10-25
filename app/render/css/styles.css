@@ -4,10 +4,14 @@
 html,
 body {
   background-color: white;
-  font-family: 'Lato', sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
   padding: 0;
   margin: 0; }
+
+textarea {
+  font-family: Arial, Helvetica, sans-serif;
+  resize: none; }
 
 .app {
   width: 100vw;
@@ -161,8 +165,9 @@ body {
   text-align: center;
   font-size: 20px; }
 
-input[type="text"],
-select, textarea {
+input[type='text'],
+select,
+textarea {
   font-size: 16px;
   width: 100%;
   padding: 12px 12px;
@@ -172,10 +177,8 @@ select, textarea {
   border-radius: 4px;
   box-sizing: border-box; }
 
-textarea {
-  resize: none; }
-
-input[type="text"]:focus, textarea:focus {
+input[type='text']:focus,
+textarea:focus {
   background-color: lightblue; }
 
 .formSave {
@@ -193,7 +196,8 @@ input[type="text"]:focus, textarea:focus {
 .formSave:hover {
   background-color: #45a049; }
 
-.checkboxList, .pricesList {
+.checkboxList,
+.pricesList {
   width: 100%;
   padding: 12px 12px;
   margin: 4px 0px 12px;
@@ -203,13 +207,16 @@ input[type="text"]:focus, textarea:focus {
   display: flex;
   flex-direction: column; }
 
-.checkboxList label, .pricesList label {
+.checkboxList label,
+.pricesList label {
   padding: 5px; }
 
-.checkboxList > div, .pricesList > div {
+.checkboxList > div,
+.pricesList > div {
   margin-bottom: 10px; }
 
-.checkboxList > legend, .pricesList legend {
+.checkboxList > legend,
+.pricesList legend {
   font-weight: 350; }
 
 .priceContainer {
@@ -220,9 +227,9 @@ input[type="text"]:focus, textarea:focus {
 .priceControls {
   display: flex;
   width: 100%;
-  justify-content: end; }
+  justify-content: flex-start; }
 
-.priceControls input {
+.priceControls input, table input {
   font-size: medium;
   font-weight: bold;
   color: white;
@@ -231,3 +238,27 @@ input[type="text"]:focus, textarea:focus {
   border: none;
   border-radius: 4px;
   cursor: pointer; }
+
+table {
+  width: 100%; }
+
+table,
+th,
+td {
+  border: 1px solid #ccc;
+  border-spacing: 0;
+  text-align: center; }
+
+th,
+td {
+  background-color: white;
+  padding: 5px 10px;
+  border-top-width: 0;
+  border-left-width: 0; }
+
+th:last-child,
+td:last-child {
+  border-right-width: 0; }
+
+tr:last-child td {
+  border-bottom-width: 0; }

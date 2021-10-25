@@ -7,11 +7,12 @@ const { createDocumentComponents } = require('./main/pdf/printers')
 const openWindow = () => {
     const win = new BrowserWindow({
         width: 1600,
-        height: 600,
+        height: 800,
         //resizable: false,c
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            enableRemoteModule: true
         }
     })
 

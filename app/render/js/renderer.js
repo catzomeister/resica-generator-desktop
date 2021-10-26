@@ -4,12 +4,13 @@ const { stat, readdir, readFile } = require('fs/promises')
 const fs = require('fs')
 const path = require('path')
 const dom = require('./resicaDom')
-const { electron } = require('process')
+const _ = require('lodash')
 
 displayInitialScreen()
 
 let currentCatalogDirectory = ''
 let currentVersion = ''
+let currentCategoryDirectory = ''
 
 dragDrop('#uploader', (files, pos, fileList, directories) => {
     console.log('fileList', fileList)
@@ -65,6 +66,7 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                                 return readdir(fsItemPath).then(images => {
                                     currentCatalogDirectory = info.currentCatalogDirectory
                                     currentVersion = info.currentVersion
+                                    currentCategoryDirectory = fsItemPath
                                     showImagesList(images)
                                     return true
                                 })
@@ -89,7 +91,7 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
             const info = loadInfo(fsItemPath)
             console.log('INFO: ', info)
             showGeneralConfiguration(info)
-            currentCatalogDirectory = ''
+            currentCatalogDirectory = path.dirname(fsItemPath)
             currentVersion = ''
         } else if (s.isFile() && (fsItemName.endsWith('.jpg') || fsItemName.endsWith('.png'))) {
             // la imagen debe encontrarse dentro de un category directory
@@ -99,8 +101,14 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                     if (info) {
                         currentCatalogDirectory = info.currentCatalogDirectory
                         currentVersion = info.currentVersion
+                        currentCategoryDirectory = path.dirname(fsItemPath)
                         console.log('IMAGE PARTY: ', fsItemName)
-                        showProductInfo(fsItemName, fsItemPath)
+                        //////////////
+                        const descriptor =
+                            loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
+                        const product = descriptor.find(p => p.code === path.parse(fsItemName).name)
+                        /////////////
+                        showProductInfo(fsItemName, fsItemPath, product)
                         return true
                     }
 
@@ -214,12 +222,32 @@ function showGeneralConfiguration(info) {
     console.log('showPrices: ', document.getElementById('showPrices').value)
 }
 
-function showProductInfo(itemName, itemPath) {
+function showProductInfo(itemName, itemPath, product) {
     dom.setStyleDisplay(dom.DISPLAY_FLEX, ['uploaderFileName', 'uploaderWallArt'])
         .setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace', 'item-form'])
         .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'notification-area', 'catalog-form'])
         .setInnerText(itemName, ['uploaderFileName'])
         .setScr(itemPath, ['itemImg'])
+
+    if (product) {
+        dom.setValue(product.code, ['code'])
+            .setValue(product.name, ['name'])
+            .setValue(product.description, ['description'])
+            .setValue(product.observations, ['observations'])
+            .setChecked(product.status === 'ACT' ? true : false, ['active'])
+
+        const pricesTable = document.getElementById('pricesTable')
+        console.log('*pricesTable: ', pricesTable.rows)
+        const pricesTableLength = pricesTable.rows.length
+        for (let i = 1; i < pricesTableLength; i++) {
+            console.log('index: ', i, pricesTableLength)
+            pricesTable.deleteRow(-1)
+        }
+        console.log('product.prices: ', JSON.stringify(product.prices, null, 2))
+        product?.prices?.forEach(p => {
+            window.addPrice({ value: p.size }, { value: p.price })
+        })
+    }
 }
 
 window.saveConfiguration = () => {
@@ -271,7 +299,7 @@ window.addPrice = (size = document.getElementById('size'), price = document.getE
     }
 
     const pricesTable = document.getElementById('pricesTable')
-    console.log('pricesTable: ', pricesTable.rows)
+    //console.log('pricesTable: ', pricesTable.rows)
     const newPriceRow = pricesTable.insertRow(-1)
     const newSize = newPriceRow.insertCell(0)
     const newPrice = newPriceRow.insertCell(1)
@@ -280,7 +308,7 @@ window.addPrice = (size = document.getElementById('size'), price = document.getE
     newPrice.innerHTML = price.value
     newRemove.innerHTML = `<input type="button" value="Remover" style="background-color: #f44336" onclick="removePrice(${newPriceRow.rowIndex})" />`
 
-    const pricesData = []
+    /* const pricesData = []
     for (let i = 1; i < pricesTable.rows.length; i++) {
         const element = pricesTable.rows[i]
         pricesData.push({
@@ -288,8 +316,7 @@ window.addPrice = (size = document.getElementById('size'), price = document.getE
             price: element.cells[1].innerText
         })
     }
-
-    console.log('pricesData: ', pricesData)
+    console.log('pricesData: ', pricesData) */
 }
 
 window.removePrice = index => {
@@ -298,6 +325,7 @@ window.removePrice = index => {
 }
 
 window.saveProduct = () => {
+    const pricesTable = document.getElementById('pricesTable')
     const pricesData = []
     for (let i = 1; i < pricesTable.rows.length; i++) {
         const element = pricesTable.rows[i]
@@ -307,18 +335,49 @@ window.saveProduct = () => {
         })
     }
 
-    const product = {
-        code: dom.getValue('code')
+    pricesData.sort()
+
+    const formProduct = {
+        code: dom.getValue('code'),
         name: dom.getValue('name'),
         description: dom.getValue('description'),
         prices: pricesData,
         observations: dom.getValue('observations'),
         status: dom.getChecked('active') ? 'ACT' : 'INA'
     }
-    console.log('saving product: ', product)
+
+    console.log('***** --- *****')
+    console.log('saving product: ', formProduct)
+    console.log('currentCatalogDirectory', currentCatalogDirectory)
+    console.log('currentVersion', currentVersion)
+    console.log('currentCategoryDirectory', currentCategoryDirectory)
     //read the file
+    const existingDescriptor = loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
+    const newDescriptor = existingDescriptor.filter(p => p.code !== formProduct.code)
     //find the code
-    //delete the product
+    const existingProduct = existingDescriptor.find(p => p.code === formProduct.code) || {}
+    const newProduct = _.merge({}, existingProduct, formProduct)
     //save the new product
+    newDescriptor.push(newProduct)
     //order by name
+
+    //save the file
+    fs.writeFileSync(
+        path.resolve(currentCategoryDirectory, 'descriptor.json'),
+        JSON.stringify(newDescriptor, null, 2),
+        {
+            encoding: 'utf8',
+            flag: 'w'
+        }
+    )
+
+    event.preventDefault()
+    showNotification('El producto se guardó exitosamente')
+}
+
+function loadDescriptor(descriptorPath) {
+    if (descriptorPath) {
+        const descriptorRaw = fs.readFileSync(descriptorPath)
+        return JSON.parse(descriptorRaw)
+    }
 }

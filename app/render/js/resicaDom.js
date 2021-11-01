@@ -2,7 +2,7 @@ class ResicaDom {
     DISPLAY_NONE = 'none'
     DISPLAY_BLOCK = 'block'
     DISPLAY_FLEX = 'flex'
-    INITIAL_STATUS = ['workspace', 'uploaderFileName', 'uploaderWallArt']
+    INITIAL_STATUS = ['workspace', 'uploaderFileName', 'uploaderCategoryFiles', 'uploaderWallArt']
 
     getAttribute(attribute, id) {
         return document.getElementById(id)[attribute]

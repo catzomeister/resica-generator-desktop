@@ -23,7 +23,7 @@ textarea {
 
     // upload area
     &__uploader {
-        flex: 0 0 auto;
+        //flex: 0 0 auto;
         width: 50vw;
         display: flex;
         flex-direction: column;
@@ -34,15 +34,40 @@ textarea {
         }
 
         &__file-name {
-            height: 15%;
-            flex: 1 1 auto;
+            margin-top: 20px;
+            //height: 15%;
+            //flex: 1 1 auto;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             color: #d056e6;
+            font-size: 28px;
+            font-weight: bold;
+            //border: 1px dashed blue;
+        }
+
+        &__category-files {
+            //height: 15%;
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             font-size: 20px;
             font-weight: bold;
+            //border: 1px dashed blue;
+
+            input {
+                text-align: center;
+                width: 80%;
+                font-size: 16px;
+                padding: 12px 12px;
+                margin: 8px 0;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
         }
 
         &__wall-art {
@@ -52,6 +77,8 @@ textarea {
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            //border-top: 1px solid #ccc;
+            //border-bottom: 1px solid #ccc;
 
             img {
                 max-width: 100%;
@@ -60,13 +87,14 @@ textarea {
         }
 
         &__icon-area {
-            height: 20%;
+            //height: 20%;
             flex: 1 1 auto;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             margin-top: 20px;
+            //border: 1px dashed yellow;
 
             &__icon {
                 flex: 0 0 auto;

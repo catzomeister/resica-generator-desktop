@@ -68,7 +68,9 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                                     currentCatalogDirectory = info.currentCatalogDirectory
                                     currentVersion = info.currentVersion
                                     currentCategoryDirectory = fsItemPath
-                                    showImagesList(images)
+                                    const descriptor =
+                                        loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
+                                    showImagesList(images, descriptor)
                                     return true
                                 })
                             }
@@ -197,10 +199,58 @@ function showNotification(message) {
     //notifAct.innerHTML = `Seleccione otro directorio o <a href="#">cree una estructura de ejemplo</a>`
 }
 
-function showImagesList(files) {
-    console.log('showImagesList')
-    const images = files.filter(fsItemName => fsItemName.endsWith('.jpg') || fsItemName.endsWith('.png'))
-    console.log('images: ', images)
+function showImagesList(fileNames, descriptor) {
+    if (!_.isEmpty(fileNames)) {
+        console.log('showImagesList')
+
+        const imageNames = fileNames.filter(fsItemName => fsItemName.endsWith('.jpg') || fsItemName.endsWith('.png'))
+        let images = imageNames.map(imageName => {
+            const parsedPath = path.parse(imageName)
+            return {
+                name: parsedPath.name,
+                ext: parsedPath.ext
+            }
+        })
+        images = _.sortBy(
+            _.uniqBy(images, img => img.name),
+            ['name']
+        )
+        console.log('images: ', images)
+
+        //dom.setStyleDisplay(dom.DISPLAY_FLEX, ['uploaderCategoryFiles'])
+        const categoryProductsDataList = document.getElementById('categoryProductsDataList')
+        //categoryProductsDataList.remove
+        while (categoryProductsDataList.firstChild) {
+            categoryProductsDataList.removeChild(categoryProductsDataList.lastChild)
+        }
+
+        /* console.log('*** descriptor: ', descriptor)
+    descriptor.forEach(product => {
+        const newOptionElement = document.createElement('option')
+        newOptionElement.textContent = product.code
+        //newOptionElement.setAttribute('data-file-ext', p)
+        categoryProductsDataList.appendChild(newOptionElement)
+    }) */
+
+        images.forEach(productImage => {
+            const newOptionElement = document.createElement('option')
+            newOptionElement.textContent = productImage.name
+            newOptionElement.setAttribute('data-file-ext', productImage.ext)
+            newOptionElement.onclick = function(event) {
+                console.log('click on option!')
+            }
+            categoryProductsDataList.appendChild(newOptionElement)
+        })
+
+        showCategoryFilesSelector()
+    }
+}
+
+function showCategoryFilesSelector() {
+    document.getElementById('selectedProduct').value = ''
+    dom.setStyleDisplay(dom.DISPLAY_NONE, ['uploaderFileName', 'uploaderWallArt', 'workspace']).setStyleDisplay(dom.DISPLAY_FLEX, [
+        'uploaderCategoryFiles'
+    ])
 }
 
 function displayInitialScreen() {
@@ -234,12 +284,16 @@ function showGeneralConfiguration(info) {
     console.log('showPrices: ', document.getElementById('showPrices').value)
 }
 
-function showProductInfo(itemName, itemPath, product) {
+function showProductInfo(itemName, itemPath, product, showProductsList) {
     dom.setStyleDisplay(dom.DISPLAY_FLEX, ['uploaderFileName', 'uploaderWallArt'])
         .setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace', 'item-form'])
         .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'notification-area', 'catalog-form'])
         .setInnerText(itemName, ['uploaderFileName'])
         .setScr(itemPath, ['itemImg'])
+
+    showProductsList
+        ? dom.setStyleDisplay(dom.DISPLAY_FLEX, ['uploaderCategoryFiles'])
+        : dom.setStyleDisplay(dom.DISPLAY_NONE, ['uploaderCategoryFiles'])
 
     if (product) {
         dom.setValue(product.code, ['code'])
@@ -343,7 +397,7 @@ window.addPrice = (size = document.getElementById('size'), price = document.getE
 }
 
 window.removePrice = priceId => {
-    //const pricesTable = document.getElementById('pricesTable')    
+    //const pricesTable = document.getElementById('pricesTable')
     //pricesTable.deleteRow(index)
     console.log('id to remove: ', priceId)
     //console.log('idx to remove???: ', priceId.rowIndex)
@@ -365,7 +419,7 @@ window.saveProduct = () => {
 
     pricesData.sort()
 
-    const formProduct = {
+    const productForm = {
         code: dom.getValue('code'),
         name: dom.getValue('name'),
         description: dom.getValue('description'),
@@ -375,16 +429,16 @@ window.saveProduct = () => {
     }
 
     console.log('***** --- *****')
-    console.log('saving product: ', formProduct)
+    console.log('saving product: ', productForm)
     console.log('currentCatalogDirectory', currentCatalogDirectory)
     console.log('currentVersion', currentVersion)
     console.log('currentCategoryDirectory', currentCategoryDirectory)
     //read the file
     const existingDescriptor = loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
-    const newDescriptor = existingDescriptor.filter(p => p.code !== formProduct.code)
+    const newDescriptor = existingDescriptor.filter(p => p.code !== productForm.code)
     //find the code
-    const existingProduct = existingDescriptor.find(p => p.code === formProduct.code) || {}
-    const newProduct = _.merge({}, existingProduct, formProduct)
+    const existingProduct = existingDescriptor.find(p => p.code === productForm.code) || {}
+    const newProduct = _.merge({}, existingProduct, productForm)
     //save the new product
     newDescriptor.push(newProduct)
     //order by name
@@ -402,6 +456,30 @@ window.saveProduct = () => {
     event.preventDefault()
     //showNotification('El producto se guardó exitosamente')
     showDialog({ title: 'Operación completada', content: 'El producto se guardó exitosamente', dialogType: 'message' })
+}
+
+window.onInputCategoryProductsDatalistItem = () => {
+    console.log('Hello Input on Datalist')
+    //console.log('xXx: ', document.getElementById('selectedProduct'))
+    const value = document.getElementById('selectedProduct').value
+//    const fileExt = document.getElementById('selectedProduct').getAttribute('data-file-ext')
+    const opts = document.getElementById('categoryProductsDataList').childNodes
+
+    for (const opt of opts) {
+        if (opt.value === value) {
+            // An item was selected from the list!
+            // yourCallbackHere()
+            console.log('xXx: ', opt)
+            console.log('value: ', value)
+            const fileExt = opt.getAttribute('data-file-ext')
+            console.log('fileExt: ', fileExt)
+            const itemPath = path.resolve(currentCategoryDirectory, `${value}${fileExt}`)
+            const descriptor = loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
+            let product = descriptor.find(p => p.code === value)
+            showProductInfo(value, itemPath, product, true)
+            break
+        }
+    }
 }
 
 function loadDescriptor(descriptorPath) {
@@ -424,4 +502,8 @@ function* ids() {
     while (true) {
         yield index++
     }
+}
+
+window.onClickCategoryProductsDatalistItem = () => {
+    console.log('click on datalist')
 }

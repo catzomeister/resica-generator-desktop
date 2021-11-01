@@ -18,7 +18,6 @@ textarea {
   height: 100vh;
   display: flex; }
   .app__uploader {
-    flex: 0 0 auto;
     width: 50vw;
     display: flex;
     flex-direction: column;
@@ -26,15 +25,31 @@ textarea {
     .app__uploader--activate {
       opacity: 0.5; }
     .app__uploader__file-name {
-      height: 15%;
-      flex: 1 1 auto;
+      margin-top: 20px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       color: #d056e6;
+      font-size: 28px;
+      font-weight: bold; }
+    .app__uploader__category-files {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       font-size: 20px;
       font-weight: bold; }
+      .app__uploader__category-files input {
+        text-align: center;
+        width: 80%;
+        font-size: 16px;
+        padding: 12px 12px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box; }
     .app__uploader__wall-art {
       height: 65%;
       flex: 1 1 auto;
@@ -46,7 +61,6 @@ textarea {
         max-width: 100%;
         max-height: 100%; }
     .app__uploader__icon-area {
-      height: 20%;
       flex: 1 1 auto;
       display: flex;
       flex-direction: column;

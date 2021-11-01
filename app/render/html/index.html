@@ -23,7 +23,6 @@
             </div>
             <div id="uploaderIconArea" class="app__uploader__icon-area">
                 <img src="../assets/upload.svg" class="app__uploader__icon-area__icon" alt="upload" />
-                <p class="app__uploader__icon-area__text">Seleccione un directorio o archivo de catálogo</p>
             </div>
         </div>
 
@@ -90,7 +89,7 @@
                     <div class="formBackground">
                         <div class="titleHeader">Producto</div>
                         <label for="code">Código</label>
-                        <input type="text" id="code" name="code" placeholder="Código del producto" readonly />
+                        <input type="text" id="code" name="code" readonly />
                         <label for="name">Nombre</label>
                         <input type="text" id="name" name="name" placeholder="Nombre del producto" />
                         <label for="description">Descripción</label>
@@ -108,7 +107,6 @@
                                         type="text"
                                         id="size"
                                         name="size"
-                                        placeholder="Tamaño"
                                     />
                                 </div>
                                 <div>
@@ -117,7 +115,6 @@
                                         type="text"
                                         id="price"
                                         name="price"
-                                        placeholder="Precio"
                                     />
                                 </div>
                                 <div class="priceControls">
@@ -138,7 +135,7 @@
                                             <th>Eliminar</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="pricesTableBody">
                                     </tbody>
                                 </table>
                             </div>
@@ -148,7 +145,7 @@
                             type="text"
                             id="observations"
                             name="observations"
-                            placeholder="Observaciones"
+                            placeholder="Información adicional"
                         />
                         <input
                             type="checkbox"

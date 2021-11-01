@@ -11,6 +11,7 @@ displayInitialScreen()
 let currentCatalogDirectory = ''
 let currentVersion = ''
 let currentCategoryDirectory = ''
+const idGenerator = ids()
 
 dragDrop('#uploader', (files, pos, fileList, directories) => {
     console.log('fileList', fileList)
@@ -106,8 +107,18 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                         //////////////
                         const descriptor =
                             loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
-                        const product = descriptor.find(p => p.code === path.parse(fsItemName).name)
+                        let product = descriptor.find(p => p.code === path.parse(fsItemName).name)
                         /////////////
+                        if (!product) {
+                            product = {
+                                code: path.parse(fsItemName).name,
+                                name: '',
+                                description: '',
+                                observations: '',
+                                status: 'ACT',
+                                prices: []
+                            }
+                        }
                         showProductInfo(fsItemName, fsItemPath, product)
                         return true
                     }
@@ -186,8 +197,9 @@ function showNotification(message) {
     //notifAct.innerHTML = `Seleccione otro directorio o <a href="#">cree una estructura de ejemplo</a>`
 }
 
-function showImagesList(images) {
+function showImagesList(files) {
     console.log('showImagesList')
+    const images = files.filter(fsItemName => fsItemName.endsWith('.jpg') || fsItemName.endsWith('.png'))
     console.log('images: ', images)
 }
 
@@ -232,6 +244,8 @@ function showProductInfo(itemName, itemPath, product) {
     if (product) {
         dom.setValue(product.code, ['code'])
             .setValue(product.name, ['name'])
+            .setValue('', ['size'])
+            .setValue('', ['price'])
             .setValue(product.description, ['description'])
             .setValue(product.observations, ['observations'])
             .setChecked(product.status === 'ACT' ? true : false, ['active'])
@@ -294,19 +308,28 @@ window.printPdf = () => {
 
 window.addPrice = (size = document.getElementById('size'), price = document.getElementById('price')) => {
     if (!size.value || !price.value) {
-        remote.dialog.showErrorBox('Datos incorrectos', 'Debe ingresar el tamaño y el precio')
+        //remote.dialog.showErrorBox('Datos incorrectos', 'Debe ingresar el tamaño y el precio')
+        showDialog({
+            title: 'Operación no completada',
+            content: 'Debe ingresar el tamaño y el precio',
+            dialogType: 'error'
+        })
         return
     }
 
-    const pricesTable = document.getElementById('pricesTable')
+    const pricesTable = document.getElementById('pricesTableBody')
     //console.log('pricesTable: ', pricesTable.rows)
     const newPriceRow = pricesTable.insertRow(-1)
+    const newPriceId = `priceRow${idGenerator.next().value}`
+    newPriceRow.id = newPriceId
+    console.log('newPriceRow: ', newPriceRow)
+    console.log('newPriceId: ', newPriceId)
     const newSize = newPriceRow.insertCell(0)
     const newPrice = newPriceRow.insertCell(1)
     const newRemove = newPriceRow.insertCell(2)
     newSize.innerHTML = size.value
     newPrice.innerHTML = price.value
-    newRemove.innerHTML = `<input type="button" value="Remover" style="background-color: #f44336" onclick="removePrice(${newPriceRow.rowIndex})" />`
+    newRemove.innerHTML = `<input type="button" value="Remover" style="background-color: #f44336" onclick="removePrice('${newPriceId}')" />`
 
     /* const pricesData = []
     for (let i = 1; i < pricesTable.rows.length; i++) {
@@ -319,9 +342,14 @@ window.addPrice = (size = document.getElementById('size'), price = document.getE
     console.log('pricesData: ', pricesData) */
 }
 
-window.removePrice = index => {
-    const pricesTable = document.getElementById('pricesTable')
-    pricesTable.deleteRow(index)
+window.removePrice = priceId => {
+    //const pricesTable = document.getElementById('pricesTable')    
+    //pricesTable.deleteRow(index)
+    console.log('id to remove: ', priceId)
+    //console.log('idx to remove???: ', priceId.rowIndex)
+    const selectedRowIndex = document.getElementById(priceId).rowIndex
+    console.log('row index to remove: ', selectedRowIndex)
+    pricesTable.deleteRow(selectedRowIndex)
 }
 
 window.saveProduct = () => {
@@ -372,12 +400,28 @@ window.saveProduct = () => {
     )
 
     event.preventDefault()
-    showNotification('El producto se guardó exitosamente')
+    //showNotification('El producto se guardó exitosamente')
+    showDialog({ title: 'Operación completada', content: 'El producto se guardó exitosamente', dialogType: 'message' })
 }
 
 function loadDescriptor(descriptorPath) {
     if (descriptorPath) {
         const descriptorRaw = fs.readFileSync(descriptorPath)
         return JSON.parse(descriptorRaw)
+    }
+}
+
+function showDialog({ title, content, dialogType }) {
+    if (dialogType === 'error') {
+        remote.dialog.showErrorBox(title, content)
+    } else if (dialogType === 'message') {
+        remote.dialog.showMessageBox({ title, message: content, type: 'info' })
+    }
+}
+
+function* ids() {
+    let index = 0
+    while (true) {
+        yield index++
     }
 }

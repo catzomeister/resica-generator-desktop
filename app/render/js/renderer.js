@@ -61,6 +61,7 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                 })
                 .then(isResicaDirectory => {
                     if (!isResicaDirectory) {
+                        console.log('-> fsItemPath category block: ', fsItemPath)
                         return validateResicaDirectory(fsItemPath, 'category', 0, root).then(info => {
                             console.log('*** CATEGORY BLOCK ***', info)
                             if (info) {
@@ -70,8 +71,20 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                                     currentCategoryDirectory = fsItemPath
                                     const descriptor =
                                         loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
-                                    showImagesList(images, descriptor)
-                                    return true
+                                    if (!_.isEmpty(descriptor)) {
+                                        console.log('scenario 1')
+                                        showImagesList(images, descriptor)
+                                        return true
+                                    } else {
+                                        console.log('scenario 2')
+                                        showNotification(
+                                            'El elemento seleccionado no es un directorio o archivo Resica'
+                                        )
+                                        currentCatalogDirectory = ''
+                                        currentVersion = ''
+                                        currentCategoryDirectory = ''
+                                        return false
+                                    }
                                 })
                             }
 
@@ -96,6 +109,34 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
             showGeneralConfiguration(info)
             currentCatalogDirectory = path.dirname(fsItemPath)
             currentVersion = ''
+        } else if (s.isFile() && fsItemName === 'descriptor.json') {
+            console.log('-> fsItemPath descriptor block: ', fsItemPath)
+            const descriptorDirectory = path.dirname(fsItemPath)
+            return validateResicaDirectory(descriptorDirectory, 'category', 0, root).then(info => {
+                console.log('*** DESCRIPTOR BLOCK ***', info)
+                if (info) {
+                    return readdir(descriptorDirectory).then(images => {
+                        currentCatalogDirectory = info.currentCatalogDirectory
+                        currentVersion = info.currentVersion
+                        currentCategoryDirectory = descriptorDirectory
+                        const descriptor = loadDescriptor(fsItemPath) || []
+                        if (!_.isEmpty(descriptor)) {
+                            console.log('scenario 1')
+                            showImagesList(images, descriptor)
+                            return true
+                        } else {
+                            console.log('scenario 2')
+                            showNotification('El elemento seleccionado no es un directorio o archivo Resica')
+                            currentCatalogDirectory = ''
+                            currentVersion = ''
+                            currentCategoryDirectory = ''
+                            return false
+                        }
+                    })
+                }
+
+                return false
+            })
         } else if (s.isFile() && (fsItemName.endsWith('.jpg') || fsItemName.endsWith('.png'))) {
             // la imagen debe encontrarse dentro de un category directory
             validateResicaDirectory(fsItemPath, 'category', 0, root)
@@ -191,7 +232,14 @@ function showNotification(message) {
     const notifMsg = document.getElementById('notification-text')
     const notifAct = document.getElementById('notification-action')
     dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
-        .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'catalog-form', 'item-form'])
+        .setStyleDisplay(dom.DISPLAY_NONE, [
+            'catalog-resume',
+            'catalog-form',
+            'item-form',
+            'uploaderFileName',
+            'uploaderCategoryFiles',
+            'uploaderWallArt'
+        ])
         .setStyleDisplay(dom.DISPLAY_FLEX, ['notification-area'])
 
     notifMsg.innerText = message
@@ -236,7 +284,7 @@ function showImagesList(fileNames, descriptor) {
             const newOptionElement = document.createElement('option')
             newOptionElement.textContent = productImage.name
             newOptionElement.setAttribute('data-file-ext', productImage.ext)
-            newOptionElement.onclick = function(event) {
+            newOptionElement.onclick = function (event) {
                 console.log('click on option!')
             }
             categoryProductsDataList.appendChild(newOptionElement)
@@ -248,9 +296,10 @@ function showImagesList(fileNames, descriptor) {
 
 function showCategoryFilesSelector() {
     document.getElementById('selectedProduct').value = ''
-    dom.setStyleDisplay(dom.DISPLAY_NONE, ['uploaderFileName', 'uploaderWallArt', 'workspace']).setStyleDisplay(dom.DISPLAY_FLEX, [
-        'uploaderCategoryFiles'
-    ])
+    dom.setStyleDisplay(dom.DISPLAY_NONE, ['uploaderFileName', 'uploaderWallArt', 'workspace']).setStyleDisplay(
+        dom.DISPLAY_FLEX,
+        ['uploaderCategoryFiles']
+    )
 }
 
 function displayInitialScreen() {
@@ -462,7 +511,7 @@ window.onInputCategoryProductsDatalistItem = () => {
     console.log('Hello Input on Datalist')
     //console.log('xXx: ', document.getElementById('selectedProduct'))
     const value = document.getElementById('selectedProduct').value
-//    const fileExt = document.getElementById('selectedProduct').getAttribute('data-file-ext')
+    //    const fileExt = document.getElementById('selectedProduct').getAttribute('data-file-ext')
     const opts = document.getElementById('categoryProductsDataList').childNodes
 
     for (const opt of opts) {
@@ -484,8 +533,13 @@ window.onInputCategoryProductsDatalistItem = () => {
 
 function loadDescriptor(descriptorPath) {
     if (descriptorPath) {
-        const descriptorRaw = fs.readFileSync(descriptorPath)
-        return JSON.parse(descriptorRaw)
+        try {
+            const descriptorRaw = fs.readFileSync(descriptorPath)
+            return JSON.parse(descriptorRaw)
+        } catch (error) {
+            console.log('Error on loadDescriptor: ', error)
+            return []
+        }
     }
 }
 

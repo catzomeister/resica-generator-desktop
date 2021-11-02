@@ -21,7 +21,7 @@
             <div id="uploaderCategoryFiles" class="app__uploader__category-files">
                 <label for="selectedProduct">Seleccione un producto:</label>
                 <input id="selectedProduct" list="categoryProductsDataList" name="products" oninput="onInputCategoryProductsDatalistItem()" />
-                <datalist id="categoryProductsDataList" onclick="onClickCategoryProductsDatalistItem()" ></datalist>
+                <datalist id="categoryProductsDataList"></datalist>
             </div>
             <div id="uploaderWallArt" class="app__uploader__wall-art">
                 <img id="itemImg" src="../assets/MC-CUA-COC-001.jpg" alt="wall-art" />
@@ -148,7 +148,9 @@
             <div id="notification-area" class="app__workspace__notif-area">
                 <div class="app__workspace__notif-frame">
                     <div id="notification-text" class="app__workspace__notif-text"></div>
-                    <div id="notification-action" class="app__workspace__notif-action"></div>
+                    <div id="notification-action" class="app__workspace__notif-action">
+                        <button onclick="createExampleCatalog()" class="app__workspace__create-catalog-button">Crear Catálogo de Ejemplo</button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -11,6 +11,7 @@ displayInitialScreen()
 let currentCatalogDirectory = ''
 let currentVersion = ''
 let currentCategoryDirectory = ''
+let currentDirectory = ''
 const idGenerator = ids()
 
 dragDrop('#uploader', (files, pos, fileList, directories) => {
@@ -74,17 +75,17 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                                     if (!_.isEmpty(descriptor)) {
                                         console.log('scenario 1')
                                         showImagesList(images, descriptor)
-                                        return true
                                     } else {
                                         console.log('scenario 2')
                                         showNotification(
-                                            'El elemento seleccionado no es un directorio o archivo Resica'
+                                            'El elemento seleccionado no es un directorio o archivo Resica',
+                                            false
                                         )
-                                        currentCatalogDirectory = ''
-                                        currentVersion = ''
-                                        currentCategoryDirectory = ''
-                                        return false
+                                        //currentCatalogDirectory = ''
+                                        //currentVersion = ''
+                                        //currentCategoryDirectory = ''
                                     }
+                                    return true
                                 })
                             }
 
@@ -98,9 +99,11 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                     console.log('FINAL isResicaDirectory: ', isResicaDirectory)
                     if (!isResicaDirectory) {
                         console.log('its other file?')
-                        showNotification('El elemento seleccionado no es un directorio o archivo Resica')
+                        showNotification('El elemento seleccionado no es un directorio o archivo Resica', true)
                         currentCatalogDirectory = ''
                         currentVersion = ''
+                        currentCategoryDirectory = ''
+                        currentDirectory = fsItemPath
                     }
                 })
         } else if (s.isFile() && fsItemName === 'info.json') {
@@ -228,7 +231,7 @@ function loadInfo(infoPath) {
     }
 }
 
-function showNotification(message) {
+function showNotification(message, showCreateCatalogDirectoryButton) {
     const notifMsg = document.getElementById('notification-text')
     const notifAct = document.getElementById('notification-action')
     dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
@@ -243,8 +246,13 @@ function showNotification(message) {
         .setStyleDisplay(dom.DISPLAY_FLEX, ['notification-area'])
 
     notifMsg.innerText = message
-    notifAct.innerText = ''
-    //notifAct.innerHTML = `Seleccione otro directorio o <a href="#">cree una estructura de ejemplo</a>`
+
+    if (showCreateCatalogDirectoryButton) {
+        //notifAct.innerHTML = `Seleccione otro directorio o <a href="#">cree una estructura de ejemplo</a>`
+        dom.setStyleDisplay(dom.DISPLAY_FLEX, ['notification-action'])
+    } else {
+        dom.setStyleDisplay(dom.DISPLAY_NONE, ['notification-action'])
+    }
 }
 
 function showImagesList(fileNames, descriptor) {
@@ -548,6 +556,17 @@ function showDialog({ title, content, dialogType }) {
         remote.dialog.showErrorBox(title, content)
     } else if (dialogType === 'message') {
         remote.dialog.showMessageBox({ title, message: content, type: 'info' })
+    } else if (dialogType === 'question') {
+        const clicked = remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
+            title,
+            message: content,
+            type: dialogType,
+            buttons: ['Sí', 'No'],
+            defaultId: 0,
+            cancelId: 1
+        })
+        console.log('clicked: ', clicked)
+        return clicked === 0
     }
 }
 
@@ -558,6 +577,13 @@ function* ids() {
     }
 }
 
-window.onClickCategoryProductsDatalistItem = () => {
-    console.log('click on datalist')
+window.createExampleCatalog = () => {
+    if (showDialog({
+        title: 'Confirmación',
+        content: `Está seguro de que desea crear un nuevo directorio de catálogo en ${currentDirectory}?`,
+        dialogType: 'question'
+    })) {
+        // Create Resica Example Directory Structure
+        
+    }
 }

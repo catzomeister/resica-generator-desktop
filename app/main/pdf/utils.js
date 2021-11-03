@@ -54,6 +54,7 @@ function enhanceCompanyTree(companyTree, selectedVersion) {
     }
     const workingVersion = companyTree.children.find(item => isSubtypeVersion(item) && item.name === selectedVersion)
     if (workingVersion) {
+        workingVersion.selectedVersion = true
         enhanceCategories(workingVersion.children)
     }
 }

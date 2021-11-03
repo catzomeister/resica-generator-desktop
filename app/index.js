@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+require('@electron/remote/main').initialize()
 const path = require('path')
 
 const { createDocumentComponents } = require('./main/pdf/printers')

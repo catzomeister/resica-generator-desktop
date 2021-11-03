@@ -19,6 +19,7 @@
     "node-sass": "^5.0.0"
   },
   "dependencies": {
+    "@electron/remote": "^2.0.1",
     "directory-tree": "^2.3.1",
     "drag-drop": "^6.1.0",
     "fs-extra": "^9.0.1",

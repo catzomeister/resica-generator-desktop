@@ -1,5 +1,6 @@
 const dragDrop = require('drag-drop')
 const { ipcRenderer, remote } = require('electron')
+//const { dialog } = require('@electron/remote')
 const { stat, readdir, readFile } = require('fs/promises')
 const fs = require('fs')
 const path = require('path')
@@ -324,7 +325,14 @@ function showPreviewInfo(info, version) {
         .setScr(`© ${info.company} ${new Date().getFullYear()}`, ['copyright-text'])
         .setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
         .setStyleDisplay(dom.DISPLAY_FLEX, ['catalog-resume'])
-        .setStyleDisplay(dom.DISPLAY_NONE, ['notification-area', 'catalog-form', 'item-form'])
+        .setStyleDisplay(dom.DISPLAY_NONE, [
+            'notification-area',
+            'catalog-form',
+            'item-form',
+            'uploaderFileName',
+            'uploaderCategoryFiles',
+            'uploaderWallArt'
+        ])
 }
 
 function showGeneralConfiguration(info) {
@@ -588,7 +596,11 @@ window.createExampleCatalog = () => {
     ) {
         try {
             if (fs.readdirSync(currentDirectory).length > 0) {
-                showDialog({title: 'Error', content: 'El directorio del nuevo catálogo debe estar vacío', dialogType: 'error'})
+                showDialog({
+                    title: 'Error',
+                    content: 'El directorio del nuevo catálogo debe estar vacío',
+                    dialogType: 'error'
+                })
                 return
             }
 

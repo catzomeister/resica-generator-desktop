@@ -206,7 +206,7 @@ function getEofPrinter(pdfDoc) {
 
 function getCatalogBodyPrinter(doc, catalogTree, info) {
     return () => {
-        printCatalog(doc, catalogTree, info)
+        printCatalog(doc, catalogTree.children.find(c => !!c.selectedVersion), info)
     }
 }
 

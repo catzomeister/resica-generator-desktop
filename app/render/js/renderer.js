@@ -5,6 +5,7 @@ const fs = require('fs')
 const path = require('path')
 const dom = require('./resicaDom')
 const _ = require('lodash')
+const exampleCatalog = require('./exampleCatalog')
 
 displayInitialScreen()
 
@@ -578,12 +579,62 @@ function* ids() {
 }
 
 window.createExampleCatalog = () => {
-    if (showDialog({
-        title: 'Confirmación',
-        content: `Está seguro de que desea crear un nuevo directorio de catálogo en ${currentDirectory}?`,
-        dialogType: 'question'
-    })) {
-        // Create Resica Example Directory Structure
-        
+    if (
+        showDialog({
+            title: 'Confirmación',
+            content: `Está seguro de que desea crear un nuevo directorio de catálogo en ${currentDirectory}?`,
+            dialogType: 'question'
+        })
+    ) {
+        try {
+            if (fs.readdirSync(currentDirectory).length > 0) {
+                showDialog({title: 'Error', content: 'El directorio del nuevo catálogo debe estar vacío', dialogType: 'error'})
+                return
+            }
+
+            // Create Resica Example Directory Structure
+            console.log('Creating Example Catalog')
+            fs.writeFileSync(
+                path.resolve(currentDirectory, 'info.json'),
+                JSON.stringify(exampleCatalog.info, null, 2),
+                {
+                    encoding: 'utf8',
+                    flag: 'w'
+                }
+            )
+            fs.copyFileSync(
+                path.resolve(path.dirname(__dirname), 'assets/company-logo.png'),
+                path.resolve(currentDirectory, 'company-logo.png')
+            )
+            const exampleVersion = path.resolve(currentDirectory, 'VERSION 2021-08-01 (EJEMPLO)')
+            if (!fs.existsSync(exampleVersion)) {
+                fs.mkdirSync(exampleVersion)
+            }
+            const exampleCategory = path.resolve(exampleVersion, 'COCINA (EJEMPLO)')
+            if (!fs.existsSync(exampleCategory)) {
+                fs.mkdirSync(exampleCategory)
+            }
+            fs.writeFileSync(
+                path.resolve(exampleCategory, 'descriptor.json'),
+                JSON.stringify(exampleCatalog.descriptor, null, 2),
+                {
+                    encoding: 'utf8',
+                    flag: 'w'
+                }
+            )
+            fs.copyFileSync(
+                path.resolve(path.dirname(__dirname), 'assets/MC-CUA-COC-001.jpg'),
+                path.resolve(exampleCategory, 'MC-CUA-COC-001.jpg')
+            )
+            fs.copyFileSync(
+                path.resolve(path.dirname(__dirname), 'assets/MC-CUA-COC-002.jpg'),
+                path.resolve(exampleCategory, 'MC-CUA-COC-002.jpg')
+            )
+            console.log('Example Catalog Created Successfully')
+            displayInitialScreen()
+            showNotification('El nuevo catálogo fue creado exitosamente')
+        } catch (err) {
+            console.log('Error on createExampleCatalog: ', err)
+        }
     }
 }

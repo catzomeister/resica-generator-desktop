@@ -1,4 +1,4 @@
-export const exampleInfo = {
+const info = {
     title: 'CATÁLOGO DE PRODUCTOS',
     company: 'Mi Cuadro EC',
     whatsapp: '0986605577',
@@ -12,7 +12,7 @@ export const exampleInfo = {
     }
 }
 
-export const exampleDescriptor = [
+const descriptor = [
     {
         code: 'MC-CUA-COC-002',
         name: 'MC-CUA-COC-002',
@@ -56,3 +56,8 @@ export const exampleDescriptor = [
         status: 'ACT'
     }
 ]
+
+module.exports = {
+    info,
+    descriptor
+}

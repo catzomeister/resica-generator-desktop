@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 require('@electron/remote/main').initialize()
 const path = require('path')
-
 const { createDocumentComponents } = require('./main/pdf/printers')
 
 // open a window
@@ -9,7 +8,7 @@ const openWindow = () => {
     const win = new BrowserWindow({
         width: 1600,
         height: 800,
-        //resizable: false,c
+        //resizable: false
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,

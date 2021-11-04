@@ -1,12 +1,13 @@
 const dragDrop = require('drag-drop')
-const { ipcRenderer, remote } = require('electron')
-//const { dialog } = require('@electron/remote')
+const { ipcRenderer } = require('electron')
+const remote = require('@electron/remote')
 const { stat, readdir, readFile } = require('fs/promises')
 const fs = require('fs')
 const path = require('path')
 const dom = require('./resicaDom')
 const _ = require('lodash')
 const exampleCatalog = require('./exampleCatalog')
+const { log } = require('../../util/logger')
 
 displayInitialScreen()
 
@@ -17,38 +18,32 @@ let currentDirectory = ''
 const idGenerator = ids()
 
 dragDrop('#uploader', (files, pos, fileList, directories) => {
-    console.log('fileList', fileList)
-    console.log('directories', directories)
-
+    log.debug('dragDrop()')
+    log.debug('$fileList', fileList)
+    log.debug('$directories: ', directories)
     const fsItemName = fileList[0].name
     const fsItemPath = fileList[0].path
-    console.log('f0 version: ', fsItemName)
-    console.log('f0 path: ', fsItemPath)
-
+    log.debug('$fsItemName', fsItemName)
+    log.debug('$fsItemPath', fsItemPath)
     const root = path.parse(fsItemPath).root
 
     stat(fsItemPath).then(s => {
         if (s.isDirectory()) {
-            // Version Directory
             validateResicaDirectory(fsItemPath, 'version')
                 .then(info => {
-                    console.log('*** VERSION BLOCK ***', info)
+                    log.debug('*** VERSION BLOCK *** $info', info)
                     if (info) {
                         showPreviewInfo(info, fsItemName)
                         currentVersion = fsItemName
                         currentCatalogDirectory = path.dirname(fsItemPath)
                         return true
-                    } /* else {
-                    showNotification('El directorio seleccionado no es de tipo catálogo')
-                    currentCatalogDirectory = ''
-                    currentVersion = ''
-                } */
+                    }
                     return false
                 })
                 .then(isResicaDirectory => {
                     if (!isResicaDirectory) {
                         return validateResicaDirectory(fsItemPath, 'company').then(info => {
-                            console.log('*** COMPANY BLOCK ***', info)
+                            log.debug('*** COMPANY BLOCK *** $info', info)
                             if (info) {
                                 showGeneralConfiguration(info)
                                 currentCatalogDirectory = fsItemPath
@@ -64,9 +59,9 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                 })
                 .then(isResicaDirectory => {
                     if (!isResicaDirectory) {
-                        console.log('-> fsItemPath category block: ', fsItemPath)
+                        log.debug('$fsItemPath category block: ', fsItemPath)
                         return validateResicaDirectory(fsItemPath, 'category', 0, root).then(info => {
-                            console.log('*** CATEGORY BLOCK ***', info)
+                            log.debug('*** CATEGORY BLOCK *** $info', info)
                             if (info) {
                                 return readdir(fsItemPath).then(images => {
                                     currentCatalogDirectory = info.currentCatalogDirectory
@@ -75,17 +70,12 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                                     const descriptor =
                                         loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
                                     if (!_.isEmpty(descriptor)) {
-                                        console.log('scenario 1')
                                         showImagesList(images, descriptor)
                                     } else {
-                                        console.log('scenario 2')
                                         showNotification(
                                             'El elemento seleccionado no es un directorio o archivo Resica',
                                             false
                                         )
-                                        //currentCatalogDirectory = ''
-                                        //currentVersion = ''
-                                        //currentCategoryDirectory = ''
                                     }
                                     return true
                                 })
@@ -98,9 +88,9 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                     }
                 })
                 .then(isResicaDirectory => {
-                    console.log('FINAL isResicaDirectory: ', isResicaDirectory)
+                    log.debug('FINAL $isResicaDirectory', isResicaDirectory)
                     if (!isResicaDirectory) {
-                        console.log('its other file?')
+                        log.debug('its other file?')
                         showNotification('El elemento seleccionado no es un directorio o archivo Resica', true)
                         currentCatalogDirectory = ''
                         currentVersion = ''
@@ -110,15 +100,15 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                 })
         } else if (s.isFile() && fsItemName === 'info.json') {
             const info = loadInfo(fsItemPath)
-            console.log('INFO: ', info)
+            log.debug('*** is info.json?  *** $info: ', info)
             showGeneralConfiguration(info)
             currentCatalogDirectory = path.dirname(fsItemPath)
             currentVersion = ''
         } else if (s.isFile() && fsItemName === 'descriptor.json') {
-            console.log('-> fsItemPath descriptor block: ', fsItemPath)
+            log.debug('$fsItemPath descriptor block: ', fsItemPath)
             const descriptorDirectory = path.dirname(fsItemPath)
             return validateResicaDirectory(descriptorDirectory, 'category', 0, root).then(info => {
-                console.log('*** DESCRIPTOR BLOCK ***', info)
+                log.debug('*** DESCRIPTOR BLOCK *** $info', info)
                 if (info) {
                     return readdir(descriptorDirectory).then(images => {
                         currentCatalogDirectory = info.currentCatalogDirectory
@@ -126,11 +116,9 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                         currentCategoryDirectory = descriptorDirectory
                         const descriptor = loadDescriptor(fsItemPath) || []
                         if (!_.isEmpty(descriptor)) {
-                            console.log('scenario 1')
                             showImagesList(images, descriptor)
                             return true
                         } else {
-                            console.log('scenario 2')
                             showNotification('El elemento seleccionado no es un directorio o archivo Resica')
                             currentCatalogDirectory = ''
                             currentVersion = ''
@@ -143,15 +131,15 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                 return false
             })
         } else if (s.isFile() && (fsItemName.endsWith('.jpg') || fsItemName.endsWith('.png'))) {
-            // la imagen debe encontrarse dentro de un category directory
+            // the image must be located inside a category directory
             validateResicaDirectory(fsItemPath, 'category', 0, root)
                 .then(info => {
-                    console.log('*** IMAGE BLOCK ***', info)
+                    log.debug('*** IMAGE BLOCK ***', info)
                     if (info) {
                         currentCatalogDirectory = info.currentCatalogDirectory
                         currentVersion = info.currentVersion
                         currentCategoryDirectory = path.dirname(fsItemPath)
-                        console.log('IMAGE PARTY: ', fsItemName)
+                        log.debug('IMAGE PARTY: ', fsItemName)
                         //////////////
                         const descriptor =
                             loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
@@ -190,18 +178,18 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
 
 function validateResicaDirectory(_path, type = 'category', currentDeep = 0, root = '') {
     if (root && root === _path) {
-        console.log('reach root directory')
+        log.debug('reach root directory')
         return false
     }
     const targetDirectory = type === 'version' || type === 'category' ? path.dirname(_path) : _path
-    console.log('path to evaluate: ', _path)
-    console.log('target directory: ', targetDirectory)
+    log.debug('path to evaluate: ', _path)
+    log.debug('target directory: ', targetDirectory)
 
     if (type !== 'category') {
         return readdir(targetDirectory).then(files => {
-            console.log('files inside directory', files)
+            log.debug('files inside directory', files)
             if (files.includes('info.json') && files.includes('company-logo.png')) {
-                console.log(`it is a ${type} directory!`)
+                log.debug(`it is a ${type} directory!`)
                 const info = loadInfo(path.resolve(targetDirectory, 'info.json'))
                 info.logoPath = path.resolve(targetDirectory, 'company-logo.png')
                 return info
@@ -209,12 +197,12 @@ function validateResicaDirectory(_path, type = 'category', currentDeep = 0, root
         })
     } else {
         return readdir(targetDirectory).then(files => {
-            console.log('files inside directory', files)
+            log.debug('files inside directory', files)
             if (files.includes('info.json') && files.includes('company-logo.png') && currentDeep === 0) {
-                console.log('error')
+                log.debug('error')
                 return false
             } else if (files.includes('info.json') && files.includes('company-logo.png') && currentDeep > 0) {
-                console.log('it is a category directory!')
+                log.debug('it is a category directory!')
                 return {
                     currentCatalogDirectory: targetDirectory,
                     currentVersion: _path
@@ -235,7 +223,6 @@ function loadInfo(infoPath) {
 
 function showNotification(message, showCreateCatalogDirectoryButton) {
     const notifMsg = document.getElementById('notification-text')
-    const notifAct = document.getElementById('notification-action')
     dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
         .setStyleDisplay(dom.DISPLAY_NONE, [
             'catalog-resume',
@@ -250,7 +237,6 @@ function showNotification(message, showCreateCatalogDirectoryButton) {
     notifMsg.innerText = message
 
     if (showCreateCatalogDirectoryButton) {
-        //notifAct.innerHTML = `Seleccione otro directorio o <a href="#">cree una estructura de ejemplo</a>`
         dom.setStyleDisplay(dom.DISPLAY_FLEX, ['notification-action'])
     } else {
         dom.setStyleDisplay(dom.DISPLAY_NONE, ['notification-action'])
@@ -259,7 +245,7 @@ function showNotification(message, showCreateCatalogDirectoryButton) {
 
 function showImagesList(fileNames, descriptor) {
     if (!_.isEmpty(fileNames)) {
-        console.log('showImagesList')
+        log.debug('showImagesList')
 
         const imageNames = fileNames.filter(fsItemName => fsItemName.endsWith('.jpg') || fsItemName.endsWith('.png'))
         let images = imageNames.map(imageName => {
@@ -273,29 +259,19 @@ function showImagesList(fileNames, descriptor) {
             _.uniqBy(images, img => img.name),
             ['name']
         )
-        console.log('images: ', images)
+        log.debug('$images: ', images)
 
-        //dom.setStyleDisplay(dom.DISPLAY_FLEX, ['uploaderCategoryFiles'])
         const categoryProductsDataList = document.getElementById('categoryProductsDataList')
-        //categoryProductsDataList.remove
         while (categoryProductsDataList.firstChild) {
             categoryProductsDataList.removeChild(categoryProductsDataList.lastChild)
         }
-
-        /* console.log('*** descriptor: ', descriptor)
-    descriptor.forEach(product => {
-        const newOptionElement = document.createElement('option')
-        newOptionElement.textContent = product.code
-        //newOptionElement.setAttribute('data-file-ext', p)
-        categoryProductsDataList.appendChild(newOptionElement)
-    }) */
 
         images.forEach(productImage => {
             const newOptionElement = document.createElement('option')
             newOptionElement.textContent = productImage.name
             newOptionElement.setAttribute('data-file-ext', productImage.ext)
             newOptionElement.onclick = function (event) {
-                console.log('click on option!')
+                log.debug('click on option!')
             }
             categoryProductsDataList.appendChild(newOptionElement)
         })
@@ -317,7 +293,7 @@ function displayInitialScreen() {
 }
 
 function showPreviewInfo(info, version) {
-    console.log('info: ', info)
+    log.debug('$info: ', info)
     dom.setInnerText(info.title, ['title'])
         .setInnerText(info.company, ['company-text'])
         .setInnerText(version, ['version-text'])
@@ -347,7 +323,7 @@ function showGeneralConfiguration(info) {
         .setChecked(!!info.fields.showDescription, ['showDescription'])
         .setChecked(!!info.fields.showPrices, ['showPrices'])
         .setChecked(!!info.fields.showObservations, ['showObservations'])
-    console.log('showPrices: ', document.getElementById('showPrices').value)
+    log.debug('showPrices: ', document.getElementById('showPrices').value)
 }
 
 function showProductInfo(itemName, itemPath, product, showProductsList) {
@@ -371,13 +347,13 @@ function showProductInfo(itemName, itemPath, product, showProductsList) {
             .setChecked(product.status === 'ACT' ? true : false, ['active'])
 
         const pricesTable = document.getElementById('pricesTable')
-        console.log('*pricesTable: ', pricesTable.rows)
+        log.debug('$pricesTable: ', pricesTable.rows)
         const pricesTableLength = pricesTable.rows.length
         for (let i = 1; i < pricesTableLength; i++) {
-            console.log('index: ', i, pricesTableLength)
+            log.debug('index: ', i, pricesTableLength)
             pricesTable.deleteRow(-1)
         }
-        console.log('product.prices: ', JSON.stringify(product.prices, null, 2))
+        log.debug('product.prices: ', JSON.stringify(product.prices, null, 2))
         product?.prices?.forEach(p => {
             window.addPrice({ value: p.size }, { value: p.price })
         })
@@ -385,7 +361,7 @@ function showProductInfo(itemName, itemPath, product, showProductsList) {
 }
 
 window.saveConfiguration = () => {
-    console.log('saveConfiguration()')
+    log.debug('saveConfiguration()')
     const configuration = {
         title: dom.getValue('title'),
         company: dom.getValue('company'),
@@ -409,7 +385,7 @@ window.saveConfiguration = () => {
 }
 
 window.printPdf = () => {
-    console.log('Generando PDF')
+    log.debug('Generating PDF...')
 
     ipcRenderer.invoke('app:generate-pdf-catalog', currentCatalogDirectory, currentVersion).then(success => {
         const notifMsg = document.getElementById('notification-text')
@@ -428,7 +404,6 @@ window.printPdf = () => {
 
 window.addPrice = (size = document.getElementById('size'), price = document.getElementById('price')) => {
     if (!size.value || !price.value) {
-        //remote.dialog.showErrorBox('Datos incorrectos', 'Debe ingresar el tamaño y el precio')
         showDialog({
             title: 'Operación no completada',
             content: 'Debe ingresar el tamaño y el precio',
@@ -438,37 +413,23 @@ window.addPrice = (size = document.getElementById('size'), price = document.getE
     }
 
     const pricesTable = document.getElementById('pricesTableBody')
-    //console.log('pricesTable: ', pricesTable.rows)
     const newPriceRow = pricesTable.insertRow(-1)
     const newPriceId = `priceRow${idGenerator.next().value}`
     newPriceRow.id = newPriceId
-    console.log('newPriceRow: ', newPriceRow)
-    console.log('newPriceId: ', newPriceId)
+    log.debug('$newPriceRow: ', newPriceRow)
+    log.debug('$newPriceId: ', newPriceId)
     const newSize = newPriceRow.insertCell(0)
     const newPrice = newPriceRow.insertCell(1)
     const newRemove = newPriceRow.insertCell(2)
     newSize.innerHTML = size.value
     newPrice.innerHTML = price.value
     newRemove.innerHTML = `<input type="button" value="Remover" style="background-color: #f44336" onclick="removePrice('${newPriceId}')" />`
-
-    /* const pricesData = []
-    for (let i = 1; i < pricesTable.rows.length; i++) {
-        const element = pricesTable.rows[i]
-        pricesData.push({
-            size: element.cells[0].innerText,
-            price: element.cells[1].innerText
-        })
-    }
-    console.log('pricesData: ', pricesData) */
 }
 
 window.removePrice = priceId => {
-    //const pricesTable = document.getElementById('pricesTable')
-    //pricesTable.deleteRow(index)
-    console.log('id to remove: ', priceId)
-    //console.log('idx to remove???: ', priceId.rowIndex)
+    log.debug('id to remove: ', priceId)
     const selectedRowIndex = document.getElementById(priceId).rowIndex
-    console.log('row index to remove: ', selectedRowIndex)
+    log.debug('row index to remove: ', selectedRowIndex)
     pricesTable.deleteRow(selectedRowIndex)
 }
 
@@ -494,11 +455,11 @@ window.saveProduct = () => {
         status: dom.getChecked('active') ? 'ACT' : 'INA'
     }
 
-    console.log('***** --- *****')
-    console.log('saving product: ', productForm)
-    console.log('currentCatalogDirectory', currentCatalogDirectory)
-    console.log('currentVersion', currentVersion)
-    console.log('currentCategoryDirectory', currentCategoryDirectory)
+    log.debug('***** --- *****')
+    log.debug('saving product: ', productForm)
+    log.debug('currentCatalogDirectory', currentCatalogDirectory)
+    log.debug('currentVersion', currentVersion)
+    log.debug('currentCategoryDirectory', currentCategoryDirectory)
     //read the file
     const existingDescriptor = loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
     const newDescriptor = existingDescriptor.filter(p => p.code !== productForm.code)
@@ -508,7 +469,6 @@ window.saveProduct = () => {
     //save the new product
     newDescriptor.push(newProduct)
     //order by name
-
     //save the file
     fs.writeFileSync(
         path.resolve(currentCategoryDirectory, 'descriptor.json'),
@@ -520,25 +480,20 @@ window.saveProduct = () => {
     )
 
     event.preventDefault()
-    //showNotification('El producto se guardó exitosamente')
     showDialog({ title: 'Operación completada', content: 'El producto se guardó exitosamente', dialogType: 'message' })
 }
 
 window.onInputCategoryProductsDatalistItem = () => {
-    console.log('Hello Input on Datalist')
-    //console.log('xXx: ', document.getElementById('selectedProduct'))
     const value = document.getElementById('selectedProduct').value
-    //    const fileExt = document.getElementById('selectedProduct').getAttribute('data-file-ext')
     const opts = document.getElementById('categoryProductsDataList').childNodes
 
     for (const opt of opts) {
         if (opt.value === value) {
-            // An item was selected from the list!
-            // yourCallbackHere()
-            console.log('xXx: ', opt)
-            console.log('value: ', value)
+            // An item was selected from the list
+            log.debug('$opt: ', opt)
+            log.debug('$value: ', value)
             const fileExt = opt.getAttribute('data-file-ext')
-            console.log('fileExt: ', fileExt)
+            log.debug('fileExt: ', fileExt)
             const itemPath = path.resolve(currentCategoryDirectory, `${value}${fileExt}`)
             const descriptor = loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
             let product = descriptor.find(p => p.code === value)
@@ -554,7 +509,7 @@ function loadDescriptor(descriptorPath) {
             const descriptorRaw = fs.readFileSync(descriptorPath)
             return JSON.parse(descriptorRaw)
         } catch (error) {
-            console.log('Error on loadDescriptor: ', error)
+            log.debug('Error on loadDescriptor: ', error)
             return []
         }
     }
@@ -574,7 +529,7 @@ function showDialog({ title, content, dialogType }) {
             defaultId: 0,
             cancelId: 1
         })
-        console.log('clicked: ', clicked)
+        log.debug('clicked: ', clicked)
         return clicked === 0
     }
 }
@@ -605,7 +560,7 @@ window.createExampleCatalog = () => {
             }
 
             // Create Resica Example Directory Structure
-            console.log('Creating Example Catalog')
+            log.debug('Creating Example Catalog')
             fs.writeFileSync(
                 path.resolve(currentDirectory, 'info.json'),
                 JSON.stringify(exampleCatalog.info, null, 2),
@@ -642,11 +597,11 @@ window.createExampleCatalog = () => {
                 path.resolve(path.dirname(__dirname), 'assets/MC-CUA-COC-002.jpg'),
                 path.resolve(exampleCategory, 'MC-CUA-COC-002.jpg')
             )
-            console.log('Example Catalog Created Successfully')
+            log.debug('Example Catalog Created Successfully')
             displayInitialScreen()
             showNotification('El nuevo catálogo fue creado exitosamente')
         } catch (err) {
-            console.log('Error on createExampleCatalog: ', err)
+            log.error('Error on createExampleCatalog: ', err)
         }
     }
 }

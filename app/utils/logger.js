@@ -1,3 +1,5 @@
+'use strict'
+
 const log = require('electron-log')
 log.transports.console.level = 'debug'
 

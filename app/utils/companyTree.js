@@ -1,6 +1,5 @@
 'use strict'
 
-const fs = require('fs')
 const path = require('path')
 const _ = require('lodash')
 const { defaultInfo, fileConstans } = require('./defaultInfo')
@@ -61,7 +60,11 @@ function enhanceCompanyTree(companyTree, selectedVersion) {
 
 function enhanceCategories(children, prefix) {
     children.forEach(item => {
-        if (isDirectory(item) && item.subtype !== fileConstans.SUBTYPE_CATALOG && item.subtype !== fileConstans.SUBTYPE_VERSION) {
+        if (
+            isDirectory(item) &&
+            item.subtype !== fileConstans.SUBTYPE_CATALOG &&
+            item.subtype !== fileConstans.SUBTYPE_VERSION
+        ) {
             item.subtype = fileConstans.SUBTYPE_CATEGORY
         }
         if (isDirectory(item) && prefix) {
@@ -71,22 +74,6 @@ function enhanceCategories(children, prefix) {
             enhanceCategories(item.children, item.verboseName || item.name)
         }
     })
-}
-
-function loadDescriptor(descriptorMeta) {
-    if (descriptorMeta) {
-        const descriptorRaw = fs.readFileSync(descriptorMeta.path)
-        return JSON.parse(descriptorRaw)
-    }
-    return []
-}
-
-function loadInfo(infoMeta) {
-    if (infoMeta) {
-        const infoRaw = fs.readFileSync(infoMeta.path)
-        return JSON.parse(infoRaw)
-    }
-    return {}
 }
 
 function getCoverPage(companyTree, selectedVersion, info) {
@@ -124,8 +111,6 @@ module.exports = {
     isDescriptor,
     isDirectory,
     isSubtypeCategory,
-    loadInfo,
-    loadDescriptor,
     getCoverPage,
     enhanceCompanyTree
 }

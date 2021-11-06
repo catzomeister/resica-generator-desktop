@@ -1,8 +1,11 @@
+'use strict'
 class ResicaDom {
-    DISPLAY_NONE = 'none'
-    DISPLAY_BLOCK = 'block'
-    DISPLAY_FLEX = 'flex'
-    INITIAL_STATUS = ['workspace', 'uploaderFileName', 'uploaderCategoryFiles', 'uploaderWallArt']
+    constructor() {
+        this.DISPLAY_NONE = 'none'
+        this.DISPLAY_BLOCK = 'block'
+        this.DISPLAY_FLEX = 'flex'
+        this.INITIAL_STATUS = ['workspace', 'uploaderFileName', 'uploaderCategoryFiles', 'uploaderWallArt']
+    }
 
     getAttribute(attribute, id) {
         return document.getElementById(id)[attribute]

@@ -19,7 +19,7 @@ const defaultInfo = {
             align: 'center'
         },
         company: {
-            imagePath: '../../resources/company-logo.png',
+            imagePath: '../resources/company-logo.png',
             font: fontConfig.MAIN_FONT_BOLD,
             color: 'black',
             size: 60,
@@ -42,7 +42,7 @@ const defaultInfo = {
         },
         whatsapp: {
             font: fontConfig.MAIN_FONT_BOLD,
-            imagePath: path.resolve(__dirname, '../../resources/whatsapp-64.png'),
+            imagePath: path.resolve(__dirname, '../resources/whatsapp-64.png'),
             color: 'gray',
             size: 15,
             text: '0986605577',
@@ -50,7 +50,7 @@ const defaultInfo = {
         },
         instagram: {
             font: fontConfig.MAIN_FONT_BOLD,
-            imagePath: path.resolve(__dirname, '../../resources/instagram-64.png'),
+            imagePath: path.resolve(__dirname, '../resources/instagram-64.png'),
             color: 'gray',
             size: 15,
             text: 'acme.labs.ec',

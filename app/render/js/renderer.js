@@ -1,3 +1,5 @@
+'use strict'
+
 const dragDrop = require('drag-drop')
 const { ipcRenderer } = require('electron')
 const remote = require('@electron/remote')
@@ -7,7 +9,7 @@ const path = require('path')
 const dom = require('./resicaDom')
 const _ = require('lodash')
 const exampleCatalog = require('./exampleCatalog')
-const { log } = require('../../util/logger')
+const { log } = require('../../utils/logger')
 
 displayInitialScreen()
 

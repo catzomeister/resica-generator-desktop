@@ -1,23 +1,20 @@
 'use strict'
 
-const fs = require('fs')
 const dirTree = require('directory-tree')
 const PDFDocument = require('pdfkit')
 const {
     isInfo,
-    isLogo,
     isImage,
     isSpecificImage,
     isActive,
     isDescriptor,
     isDirectory,
     isSubtypeCategory,
-    loadInfo,
-    loadDescriptor,
     getCoverPage,
     enhanceCompanyTree
-} = require('./utils')
-const { fontConfig } = require('./defaultInfo')
+} = require('../../utils/companyTree')
+const { loadInfo, loadDescriptor, createPdfStream } = require('../../utils/filesystem')
+const { fontConfig } = require('../../utils/defaultInfo')
 
 function getTextPrinter(pdfDoc) {
     return (textDef, x, y) => {
@@ -206,7 +203,11 @@ function getEofPrinter(pdfDoc) {
 
 function getCatalogBodyPrinter(doc, catalogTree, info) {
     return () => {
-        printCatalog(doc, catalogTree.children.find(c => !!c.selectedVersion), info)
+        printCatalog(
+            doc,
+            catalogTree.children.find(c => !!c.selectedVersion),
+            info
+        )
     }
 }
 
@@ -247,7 +248,9 @@ function createDocumentComponents(catalogDirectory, selectedVersion) {
     const info = loadInfo(infoMeta)
     const coverPage = getCoverPage(companyTree, selectedVersion, info)
     const doc = new PDFDocument({ size: 'A4' })
-    doc.pipe(fs.createWriteStream(`${catalogDirectory}/${coverPage.title.text} ${coverPage.company.text} ${coverPage.version.text}.pdf`))
+    doc.pipe(
+        createPdfStream(catalogDirectory, `${coverPage.title.text} ${coverPage.company.text} ${coverPage.version.text}`)
+    )
     const printCoverPage = getCoverPagePrinter(doc, coverPage)
     const printText = getTextPrinter(doc)
     const printCatalogBody = getCatalogBodyPrinter(doc, companyTree, info)

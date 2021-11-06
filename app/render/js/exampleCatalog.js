@@ -1,3 +1,5 @@
+'use strict'
+
 const info = {
     title: 'CATÁLOGO DE PRODUCTOS',
     company: 'Mi Cuadro EC',

@@ -3,13 +3,14 @@
 const dragDrop = require('drag-drop')
 const { ipcRenderer } = require('electron')
 const remote = require('@electron/remote')
-const { stat, readdir, readFile } = require('fs/promises')
+const { stat, readdir } = require('fs/promises')
 const fs = require('fs')
 const path = require('path')
 const dom = require('./resicaDom')
 const _ = require('lodash')
 const exampleCatalog = require('./exampleCatalog')
 const { log } = require('../../utils/logger')
+const { loadInfo, loadDescriptor } = require('../../utils/filesystem')
 
 displayInitialScreen()
 
@@ -70,7 +71,7 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                                     currentVersion = info.currentVersion
                                     currentCategoryDirectory = fsItemPath
                                     const descriptor =
-                                        loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
+                                        loadDescriptor(currentCategoryDirectory)
                                     if (!_.isEmpty(descriptor)) {
                                         showImagesList(images, descriptor)
                                     } else {
@@ -116,7 +117,7 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                         currentCatalogDirectory = info.currentCatalogDirectory
                         currentVersion = info.currentVersion
                         currentCategoryDirectory = descriptorDirectory
-                        const descriptor = loadDescriptor(fsItemPath) || []
+                        const descriptor = loadDescriptor(fsItemPath)
                         if (!_.isEmpty(descriptor)) {
                             showImagesList(images, descriptor)
                             return true
@@ -144,7 +145,7 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                         log.debug('IMAGE PARTY: ', fsItemName)
                         //////////////
                         const descriptor =
-                            loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
+                            loadDescriptor(currentCategoryDirectory)
                         let product = descriptor.find(p => p.code === path.parse(fsItemName).name)
                         /////////////
                         if (!product) {
@@ -192,7 +193,7 @@ function validateResicaDirectory(_path, type = 'category', currentDeep = 0, root
             log.debug('files inside directory', files)
             if (files.includes('info.json') && files.includes('company-logo.png')) {
                 log.debug(`it is a ${type} directory!`)
-                const info = loadInfo(path.resolve(targetDirectory, 'info.json'))
+                const info = loadInfo(targetDirectory)
                 info.logoPath = path.resolve(targetDirectory, 'company-logo.png')
                 return info
             }
@@ -216,12 +217,12 @@ function validateResicaDirectory(_path, type = 'category', currentDeep = 0, root
     }
 }
 
-function loadInfo(infoPath) {
+/* function loadInfo(infoPath) {
     if (infoPath) {
         const infoRaw = fs.readFileSync(infoPath)
         return JSON.parse(infoRaw)
     }
-}
+} */
 
 function showNotification(message, showCreateCatalogDirectoryButton) {
     const notifMsg = document.getElementById('notification-text')
@@ -463,7 +464,7 @@ window.saveProduct = () => {
     log.debug('currentVersion', currentVersion)
     log.debug('currentCategoryDirectory', currentCategoryDirectory)
     //read the file
-    const existingDescriptor = loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
+    const existingDescriptor = loadDescriptor(currentCategoryDirectory)
     const newDescriptor = existingDescriptor.filter(p => p.code !== productForm.code)
     //find the code
     const existingProduct = existingDescriptor.find(p => p.code === productForm.code) || {}
@@ -497,7 +498,7 @@ window.onInputCategoryProductsDatalistItem = () => {
             const fileExt = opt.getAttribute('data-file-ext')
             log.debug('fileExt: ', fileExt)
             const itemPath = path.resolve(currentCategoryDirectory, `${value}${fileExt}`)
-            const descriptor = loadDescriptor(path.resolve(currentCategoryDirectory, 'descriptor.json')) || []
+            const descriptor = loadDescriptor(currentCategoryDirectory)
             let product = descriptor.find(p => p.code === value)
             showProductInfo(value, itemPath, product, true)
             break
@@ -505,7 +506,7 @@ window.onInputCategoryProductsDatalistItem = () => {
     }
 }
 
-function loadDescriptor(descriptorPath) {
+/* function loadDescriptor(descriptorPath) {
     if (descriptorPath) {
         try {
             const descriptorRaw = fs.readFileSync(descriptorPath)
@@ -515,7 +516,7 @@ function loadDescriptor(descriptorPath) {
             return []
         }
     }
-}
+} */
 
 function showDialog({ title, content, dialogType }) {
     if (dialogType === 'error') {

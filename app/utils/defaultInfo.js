@@ -59,7 +59,7 @@ const defaultInfo = {
     }
 }
 
-const fileConstans = {
+const fileConstants = {
     TYPE_FILE: 'file',
     TYPE_DIRECTORY: 'directory',
     SUBTYPE_CATALOG: 'catalog',
@@ -74,5 +74,5 @@ const fileConstans = {
 module.exports = {
     fontConfig,
     defaultInfo,
-    fileConstans
+    fileConstants
 }

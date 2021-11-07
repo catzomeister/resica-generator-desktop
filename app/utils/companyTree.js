@@ -2,53 +2,53 @@
 
 const path = require('path')
 const _ = require('lodash')
-const { defaultInfo, fileConstans } = require('./defaultInfo')
+const { defaultInfo, fileConstants } = require('./defaultInfo')
 
 function isInfo(item) {
-    return item.type === fileConstans.TYPE_FILE && item.name === fileConstans.INFO_FILENAME
+    return item.type === fileConstants.TYPE_FILE && item.name === fileConstants.INFO_FILENAME
 }
 
 function isLogo(item) {
-    return item.type === fileConstans.TYPE_FILE && item.name === fileConstans.COMPANY_LOGO_FILENAME
+    return item.type === fileConstants.TYPE_FILE && item.name === fileConstants.COMPANY_LOGO_FILENAME
 }
 
 function isImage(item) {
-    return item.type === fileConstans.TYPE_FILE && (item.extension === '.png' || item.extension === '.jpg')
+    return item.type === fileConstants.TYPE_FILE && (item.extension === '.png' || item.extension === '.jpg')
 }
 
 function isSpecificImage(meta, name) {
     return (
-        meta.type === fileConstans.TYPE_FILE &&
+        meta.type === fileConstants.TYPE_FILE &&
         (meta.extension === '.png' || meta.extension === '.jpg') &&
         path.parse(meta.name).name === name
     )
 }
 
 function isDescriptor(item) {
-    return item.type === fileConstans.TYPE_FILE && item.name === fileConstans.DESCRIPTOR_FILENAME
+    return item.type === fileConstants.TYPE_FILE && item.name === fileConstants.DESCRIPTOR_FILENAME
 }
 
 function isSubtypeCategory(item) {
-    return item.subtype === fileConstans.SUBTYPE_CATEGORY
+    return item.subtype === fileConstants.SUBTYPE_CATEGORY
 }
 
 function isDirectory(item) {
-    return item.type === fileConstans.TYPE_DIRECTORY
+    return item.type === fileConstants.TYPE_DIRECTORY
 }
 
 function isSubtypeVersion(item) {
-    return item.subtype === fileConstans.SUBTYPE_VERSION
+    return item.subtype === fileConstants.SUBTYPE_VERSION
 }
 
 function isActive(item) {
-    return item.status === fileConstans.STATUS_ACTIVE
+    return item.status === fileConstants.STATUS_ACTIVE
 }
 
 function enhanceCompanyTree(companyTree, selectedVersion) {
     if (companyTree && companyTree.children.find(isInfo)) {
-        companyTree.subtype = fileConstans.SUBTYPE_CATALOG
+        companyTree.subtype = fileConstants.SUBTYPE_CATALOG
         companyTree.children.filter(isDirectory).forEach(item => {
-            item.subtype = fileConstans.SUBTYPE_VERSION
+            item.subtype = fileConstants.SUBTYPE_VERSION
         })
     }
     const workingVersion = companyTree.children.find(item => isSubtypeVersion(item) && item.name === selectedVersion)
@@ -62,10 +62,10 @@ function enhanceCategories(children, prefix) {
     children.forEach(item => {
         if (
             isDirectory(item) &&
-            item.subtype !== fileConstans.SUBTYPE_CATALOG &&
-            item.subtype !== fileConstans.SUBTYPE_VERSION
+            item.subtype !== fileConstants.SUBTYPE_CATALOG &&
+            item.subtype !== fileConstants.SUBTYPE_VERSION
         ) {
-            item.subtype = fileConstans.SUBTYPE_CATEGORY
+            item.subtype = fileConstants.SUBTYPE_CATEGORY
         }
         if (isDirectory(item) && prefix) {
             item.verboseName = `${prefix} / ${item.name}`

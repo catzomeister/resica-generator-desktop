@@ -46,8 +46,18 @@ function createPdfStream(directoryName, fileName) {
     return fs.createWriteStream(`${directoryName}/${fileName}.pdf`)
 }
 
+function companyConfFilesExist(files) {
+    return files.includes(fileConstants.INFO_FILENAME) && files.includes(fileConstants.COMPANY_LOGO_FILENAME)
+}
+
+function fileNameIsImage(fileName) {
+    return fileName.endsWith('.jpg') || fileName.endsWith('.png')
+}
+
 module.exports = {
     loadInfo,
     loadDescriptor,
-    createPdfStream
+    createPdfStream,
+    companyConfFilesExist,
+    fileNameIsImage
 }

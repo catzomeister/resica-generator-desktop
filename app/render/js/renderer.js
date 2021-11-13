@@ -12,6 +12,7 @@ const exampleCatalog = require('./exampleCatalog')
 const { log } = require('../../utils/logger')
 const { loadInfo, loadDescriptor, companyConfFilesExist, fileNameIsImage } = require('../../utils/filesystem')
 const { fileConstants } = require('../../utils/defaultInfo')
+const { getLabels } = require('./labels')
 const {
     showInitialScreen,
     showPrintPreviewInfo,
@@ -21,7 +22,9 @@ const {
     showNotification
 } = require('./rendererHelper')
 
-showInitialScreen()
+const labels = getLabels('es')
+
+showInitialScreen(labels)
 
 let currentCatalogDirectory = ''
 let currentVersion = ''
@@ -82,10 +85,7 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                                     if (!_.isEmpty(descriptor)) {
                                         showImagesList(images)
                                     } else {
-                                        showNotification(
-                                            'El elemento seleccionado no es un directorio o archivo Resica',
-                                            false
-                                        )
+                                        showNotification(labels['its.not.resica.file'], false)
                                     }
                                     return true
                                 })
@@ -100,7 +100,7 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                     log.debug('FINAL $isResicaDirectory', isResicaDirectory)
                     if (!isResicaDirectory) {
                         log.debug('its other file?')
-                        showNotification('El elemento seleccionado no es un directorio o archivo Resica', true)
+                        showNotification(labels['its.not.resica.file'], true)
                         currentCatalogDirectory = ''
                         currentVersion = ''
                         currentCategoryDirectory = ''
@@ -128,7 +128,7 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                             showImagesList(images)
                             return true
                         } else {
-                            showNotification('El elemento seleccionado no es un directorio o archivo Resica')
+                            showNotification(labels['its.not.resica.file'])
                             currentCatalogDirectory = ''
                             currentVersion = ''
                             currentCategoryDirectory = ''
@@ -148,13 +148,12 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                         currentVersion = info.currentVersion
                         currentCategoryDirectory = path.dirname(fsItemPath)
                         log.debug('IMAGE PARTY: ', fsItemName)
-                        //////////////
                         const descriptor = loadDescriptor(currentCategoryDirectory)
-                        let product = descriptor.find(p => p.code === path.parse(fsItemName).name)
-                        /////////////
+                        const code = path.parse(fsItemName).name
+                        let product = descriptor.find(p => p.code === code)
                         if (!product) {
                             product = {
-                                code: path.parse(fsItemName).name,
+                                code,
                                 name: '',
                                 description: '',
                                 observations: '',
@@ -162,20 +161,20 @@ dragDrop('#uploader', (files, pos, fileList, directories) => {
                                 prices: []
                             }
                         }
-                        showProductInfo(fsItemName, fsItemPath, product)
+                        showProductInfo(code, fsItemPath, product)
                         return true
                     }
                     return false
                 })
                 .then(isResicaDirectory => {
                     if (!isResicaDirectory) {
-                        showNotification('El elemento seleccionado no es un directorio o archivo Resica')
+                        showNotification(labels['its.not.resica.file'])
                         currentCatalogDirectory = ''
                         currentVersion = ''
                     }
                 })
         } else {
-            showNotification('El elemento seleccionado no es un directorio o archivo Resica')
+            showNotification(labels['its.not.resica.file'])
             currentCatalogDirectory = ''
             currentVersion = ''
         }
@@ -248,31 +247,44 @@ function* ids() {
 }
 
 window.saveConfiguration = () => {
-    log.debug('saveConfiguration()')
-    const configuration = {
-        title: dom.getValue('title'),
-        company: dom.getValue('company'),
-        whatsapp: dom.getValue('whatsapp'),
-        instagram: dom.getValue('instagram'),
-        fields: {
-            showCode: !!dom.getChecked('showCode'),
-            showName: !!dom.getChecked('showName'),
-            showDescription: !!dom.getChecked('showDescription'),
-            showPrices: !!dom.getChecked('showPrices'),
-            showObservations: !!dom.getChecked('showObservations')
+    try {
+        log.debug('saveConfiguration()')
+        const configuration = {
+            title: dom.getValue('title'),
+            company: dom.getValue('company'),
+            whatsapp: dom.getValue('whatsapp'),
+            instagram: dom.getValue('instagram'),
+            fields: {
+                showCode: !!dom.getChecked('showCode'),
+                showName: !!dom.getChecked('showName'),
+                showDescription: !!dom.getChecked('showDescription'),
+                showPrices: !!dom.getChecked('showPrices'),
+                showObservations: !!dom.getChecked('showObservations')
+            }
         }
-    }
-    fs.writeFileSync(
-        path.resolve(currentCatalogDirectory, fileConstants.INFO_FILENAME),
-        JSON.stringify(configuration, null, 2),
-        {
-            encoding: 'utf8',
-            flag: 'w'
-        }
-    )
+        fs.writeFileSync(
+            path.resolve(currentCatalogDirectory, fileConstants.INFO_FILENAME),
+            JSON.stringify(configuration, null, 2),
+            {
+                encoding: 'utf8',
+                flag: 'w'
+            }
+        )
 
-    event.preventDefault()
-    showNotification('La configuración se guardó exitosamente')
+        event.preventDefault()
+        showDialog({
+            title: labels['operation.completed'],
+            content: labels['conf.saved.successfully'],
+            dialogType: 'message'
+        })
+    } catch (err) {
+        log.error('Error on saveConfiguration: ', err)
+        showDialog({
+            title: labels['operation.not.completed'],
+            content: labels['conf.not.saved'],
+            dialogType: 'error'
+        })
+    }
 }
 
 window.printPdf = () => {
@@ -286,9 +298,9 @@ window.printPdf = () => {
             .setStyleDisplay(dom.DISPLAY_FLEX, ['notification-area'])
 
         if (success) {
-            notifMsg.innerText = 'Catálogo PDF generado exitosamente'
+            notifMsg.innerText = labels['pdf.catalog.generated.successfully']
         } else {
-            notifMsg.innerText = 'Catálogo PDF no generado'
+            notifMsg.innerText = labels['pdf.catalog.not.generated']
         }
     })
 }
@@ -296,8 +308,8 @@ window.printPdf = () => {
 window.addPrice = (size = document.getElementById('size'), price = document.getElementById('price')) => {
     if (!size.value || !price.value) {
         showDialog({
-            title: 'Operación no completada',
-            content: 'Debe ingresar el tamaño y el precio',
+            title: labels['operation.not.completed'],
+            content: labels['size.and.price.are.required'],
             dialogType: 'error'
         })
         return
@@ -314,7 +326,7 @@ window.addPrice = (size = document.getElementById('size'), price = document.getE
     const newRemove = newPriceRow.insertCell(2)
     newSize.innerHTML = size.value
     newPrice.innerHTML = price.value
-    newRemove.innerHTML = `<input type="button" value="Remover" style="background-color: #f44336" onclick="removePrice('${newPriceId}')" />`
+    newRemove.innerHTML = `<input type="button" value="${labels['remove']}" style="background-color: #f44336" onclick="removePrice('${newPriceId}')" />`
 }
 
 window.removePrice = priceId => {
@@ -326,53 +338,66 @@ window.removePrice = priceId => {
 }
 
 window.saveProduct = () => {
-    const pricesTable = document.getElementById('pricesTable')
-    const pricesData = []
-    for (let i = 1; i < pricesTable.rows.length; i++) {
-        const element = pricesTable.rows[i]
-        pricesData.push({
-            size: element.cells[0].innerText,
-            price: element.cells[1].innerText
+    try {
+        const pricesTable = document.getElementById('pricesTable')
+        const pricesData = []
+        for (let i = 1; i < pricesTable.rows.length; i++) {
+            const element = pricesTable.rows[i]
+            pricesData.push({
+                size: element.cells[0].innerText,
+                price: element.cells[1].innerText
+            })
+        }
+
+        pricesData.sort()
+
+        const productForm = {
+            code: dom.getValue('code'),
+            name: dom.getValue('name'),
+            description: dom.getValue('description'),
+            prices: pricesData,
+            observations: dom.getValue('observations'),
+            status: dom.getChecked('active') ? 'ACT' : 'INA'
+        }
+
+        log.debug('***** --- *****')
+        log.debug('saving product: ', productForm)
+        log.debug('currentCatalogDirectory', currentCatalogDirectory)
+        log.debug('currentVersion', currentVersion)
+        log.debug('currentCategoryDirectory', currentCategoryDirectory)
+        //read the file
+        const existingDescriptor = loadDescriptor(currentCategoryDirectory)
+        const newDescriptor = existingDescriptor.filter(p => p.code !== productForm.code)
+        //find the code
+        const existingProduct = existingDescriptor.find(p => p.code === productForm.code) || {}
+        const newProduct = _.merge({}, existingProduct, productForm)
+        //save the new product
+        newDescriptor.push(newProduct)
+        //order by name
+        //save the file
+        fs.writeFileSync(
+            path.resolve(currentCategoryDirectory, fileConstants.DESCRIPTOR_FILENAME),
+            JSON.stringify(newDescriptor, null, 2),
+            {
+                encoding: 'utf8',
+                flag: 'w'
+            }
+        )
+
+        event.preventDefault()
+        showDialog({
+            title: labels['operation.completed'],
+            content: labels['product.saved.successfully'],
+            dialogType: 'message'
+        })
+    } catch (err) {
+        log.error('Error on saveProduct: ', err)
+        showDialog({
+            title: labels['operation.not.completed'],
+            content: labels['product.not.saved'],
+            dialogType: 'error'
         })
     }
-
-    pricesData.sort()
-
-    const productForm = {
-        code: dom.getValue('code'),
-        name: dom.getValue('name'),
-        description: dom.getValue('description'),
-        prices: pricesData,
-        observations: dom.getValue('observations'),
-        status: dom.getChecked('active') ? 'ACT' : 'INA'
-    }
-
-    log.debug('***** --- *****')
-    log.debug('saving product: ', productForm)
-    log.debug('currentCatalogDirectory', currentCatalogDirectory)
-    log.debug('currentVersion', currentVersion)
-    log.debug('currentCategoryDirectory', currentCategoryDirectory)
-    //read the file
-    const existingDescriptor = loadDescriptor(currentCategoryDirectory)
-    const newDescriptor = existingDescriptor.filter(p => p.code !== productForm.code)
-    //find the code
-    const existingProduct = existingDescriptor.find(p => p.code === productForm.code) || {}
-    const newProduct = _.merge({}, existingProduct, productForm)
-    //save the new product
-    newDescriptor.push(newProduct)
-    //order by name
-    //save the file
-    fs.writeFileSync(
-        path.resolve(currentCategoryDirectory, fileConstants.DESCRIPTOR_FILENAME),
-        JSON.stringify(newDescriptor, null, 2),
-        {
-            encoding: 'utf8',
-            flag: 'w'
-        }
-    )
-
-    event.preventDefault()
-    showDialog({ title: 'Operación completada', content: 'El producto se guardó exitosamente', dialogType: 'message' })
 }
 
 window.onInputCategoryProductsDatalistItem = () => {
@@ -389,25 +414,35 @@ window.onInputCategoryProductsDatalistItem = () => {
             const itemPath = path.resolve(currentCategoryDirectory, `${value}${fileExt}`)
             const descriptor = loadDescriptor(currentCategoryDirectory)
             let product = descriptor.find(p => p.code === value)
+            if (!product) {
+                product = {
+                    code: value,
+                    name: '',
+                    description: '',
+                    observations: '',
+                    status: 'ACT',
+                    prices: []
+                }
+            }
             showProductInfo(value, itemPath, product, true)
             break
         }
     }
 }
 
-window.createExampleCatalog = () => {
+window.createExampleCompany = () => {
     if (
         showDialog({
-            title: 'Confirmación',
-            content: `Está seguro de que desea crear un nuevo directorio de catálogo en ${currentDirectory}?`,
+            title: labels['confirmation'],
+            content: `${labels['create.new.directory']} ${currentDirectory}?`,
             dialogType: 'question'
         })
     ) {
         try {
             if (fs.readdirSync(currentDirectory).length > 0) {
                 showDialog({
-                    title: 'Error',
-                    content: 'El directorio del nuevo catálogo debe estar vacío',
+                    title: labels['error'],
+                    content: labels['new.directory.must.empty'],
                     dialogType: 'error'
                 })
                 return
@@ -453,9 +488,10 @@ window.createExampleCatalog = () => {
             )
             log.debug('Example Catalog Created Successfully')
             showInitialScreen()
-            showNotification('El nuevo catálogo fue creado exitosamente')
+            showNotification(labels['new.company.created.successfully'])
         } catch (err) {
-            log.error('Error on createExampleCatalog: ', err)
+            log.error('Error on createExampleCompany: ', err)
+            showNotification(labels['new.company.not.created'])
         }
     }
 }

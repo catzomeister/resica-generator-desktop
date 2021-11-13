@@ -1,4 +1,6 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+'use strict'
+
+const { app, BrowserWindow, ipcMain } = require('electron')
 require('@electron/remote/main').initialize()
 const path = require('path')
 const { createDocumentComponents } = require('./main/pdf/printers')
@@ -45,8 +47,6 @@ app.on('activate', () => {
 })
 
 ipcMain.handle('app:generate-pdf-catalog', (event, catalogDirectory, selectedVersion) => {
-    console.log('catalogDirectory: ', catalogDirectory)
-    console.log('selectedVersion: ', selectedVersion)
     const { printCoverPage, printCatalogBody, printEof } = createDocumentComponents(catalogDirectory, selectedVersion)
     printCoverPage()
     printCatalogBody()

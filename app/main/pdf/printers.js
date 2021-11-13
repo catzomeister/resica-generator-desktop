@@ -243,7 +243,6 @@ function printCatalog(doc, catalogTree, info) {
 function createDocumentComponents(catalogDirectory, selectedVersion) {
     const companyTree = dirTree(catalogDirectory)
     enhanceCompanyTree(companyTree, selectedVersion)
-    // Validate companyTree to conform to catagen def structure
     const infoMeta = companyTree.children.find(isInfo)
     const info = loadInfo(infoMeta)
     const coverPage = getCoverPage(companyTree, selectedVersion, info)

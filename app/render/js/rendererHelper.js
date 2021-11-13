@@ -6,13 +6,52 @@ const dom = require('./resicaDom')
 const { log } = require('../../utils/logger')
 const { fileNameIsImage } = require('../../utils/filesystem')
 
-function showInitialScreen() {
+function showInitialScreen(labels) {
     dom.setStyleDisplay(dom.DISPLAY_NONE, dom.INITIAL_STATUS)
+    if (labels) {
+        dom.setInnerText(labels['select.a.product'], ['lblSelectProduct'])
+            .setInnerText(labels['print'], ['btnPrintPdf'])
+            .setInnerText(labels['general.conf'], ['lblGeneralConf'])
+            .setInnerText(labels['general.conf.title'], ['lblTitle'])
+            .setInnerText(labels['general.conf.company'], ['lblCompany'])
+            .setInnerText(labels['general.conf.whatsapp'], ['lblWhatsapp'])
+            .setInnerText(labels['general.conf.instagram'], ['lblInstagram'])
+            .setInnerText(labels['general.conf.print.options'], ['lblrintOptions'])
+            .setInnerText(labels['general.conf.print.options.show.code'], ['lblShowCode'])
+            .setInnerText(labels['general.conf.print.options.show.name'], ['lblShowName'])
+            .setInnerText(labels['general.conf.print.options.show.description'], ['lblShowDescription'])
+            .setInnerText(labels['general.conf.print.options.show.prices'], ['lblShowPrices'])
+            .setInnerText(labels['general.conf.print.options.show.observations'], ['lblShowObservations'])
+            .setValue(labels['save'], ['btnSaveConfiguration'])
+            .setInnerText(labels['item.data'], ['lblItem'])
+            .setInnerText(labels['item.data.code'], ['lblCode'])
+            .setInnerText(labels['item.data.name'], ['lblName'])
+            .setInnerText(labels['item.data.description'], ['lblDescription'])
+            .setInnerText(labels['item.data.prices'], ['lblPrices'])
+            .setInnerText(labels['item.data.prices.size'], ['lblSize'])
+            .setInnerText(labels['item.data.prices.price'], ['lblPrice'])
+            .setValue(labels['add'], ['btnAddPrice'])
+            .setInnerText(labels['item.data.prices.table.size'], ['lblTableSize'])
+            .setInnerText(labels['item.data.prices.table.price'], ['lblTablePrice'])
+            .setInnerText(labels['item.data.prices.table.delete'], ['lblTableRemove'])
+            .setInnerText(labels['item.data.observations'], ['lblObservations'])
+            .setInnerText(labels['item.data.active'], ['lblActive'])
+            .setValue(labels['save'], ['btnSaveProduct'])
+            .setInnerText(labels['create.example.company'], ['btnCreateExampleCompany'])
+    }
 }
 
 function showGeneralConfiguration(info) {
     dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace', 'catalog-form'])
-        .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'notification-area', 'item-form'])
+        .setStyleDisplay(dom.DISPLAY_NONE, [
+            'catalog-resume',
+            'notification-area',
+            'item-form',
+            'notification-area',
+            'uploaderFileName',
+            'uploaderCategoryFiles',
+            'uploaderWallArt'
+        ])
         .setValue(info.title, ['title'])
         .setValue(info.company, ['company'])
         .setValue(info.whatsapp, ['whatsapp'])

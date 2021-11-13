@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-        <title>Files Manager</title>
+        <title>Resica Generator</title>
 
         <!-- import fonts -->
         <link rel="preconnect" href="https://fonts.gstatic.com" />
@@ -19,7 +19,7 @@
         <div id="uploader" class="app__uploader">
             <div id="uploaderFileName" class="app__uploader__file-name">MC-CUA-COC-001.jpg</div>
             <div id="uploaderCategoryFiles" class="app__uploader__category-files">
-                <label for="selectedProduct">Seleccione un producto:</label>
+                <label id="lblSelectProduct" for="selectedProduct">Select a product:</label>
                 <input id="selectedProduct" list="categoryProductsDataList" name="products" oninput="onInputCategoryProductsDatalistItem()" />
                 <datalist id="categoryProductsDataList"></datalist>
             </div>
@@ -47,73 +47,74 @@
                 </div>
                 <div class="app__workspace__copyright"><div id="copyright-text"></div></div>
                 <div class="app__workspace__print">
-                    <button onclick="printPdf()" class="app__workspace__print-button">Imprimir</button>
+                    <button id="btnPrintPdf" onclick="printPdf()" class="app__workspace__print-button">Print</button>
                 </div>
             </div>
             <div id="catalog-form" class="app__workspace__catalog-form">
                 <form id="configForm" onsubmit="saveConfiguration()" method="POST">
                     <div class="formBackground">
-                        <div class="titleHeader">Configuración General</div>
-                        <label for="title">Título</label>
-                        <input type="text" id="title" name="title" placeholder="Título del documento" />
-                        <label for="company">Empresa</label>
-                        <input type="text" id="company" name="company" placeholder="Nombre de la empresa" />
-                        <label for="whatsapp">Whatsapp</label>
-                        <input type="text" id="whatsapp" name="whatsapp" placeholder="Número de teléfono" />
-                        <label for="instagram">Instagram</label>
-                        <input type="text" id="instagram" name="instagram" placeholder="Cuenta de Instagram" />
+                        <div id="lblGeneralConf" class="titleHeader">General Configuration</div>
+                        <label id="lblTitle" for="title">Title</label>
+                        <input type="text" id="title" name="title" />
+                        <label id="lblCompany" for="company">Company</label>
+                        <input type="text" id="company" name="company" />
+                        <label id="lblWhatsapp" for="whatsapp">Whatsapp</label>
+                        <input type="text" id="whatsapp" name="whatsapp" />
+                        <label id="lblInstagram" for="instagram">Instagram</label>
+                        <input type="text" id="instagram" name="instagram" />
                         <fieldset class="checkboxList">
-                            <legend>Opciones de Impresión</legend>
+                            <legend id="lblrintOptions">Print Options</legend>
                             <div>
                                 <input type="checkbox" id="showCode" name="showCode" />
-                                <label for="showCode">Mostrar código</label>
+                                <label id="lblShowCode" for="showCode">Show code</label>
                             </div>
                             <div>
                                 <input type="checkbox" id="showName" name="showName" />
-                                <label for="showName">Mostrar nombre</label>
+                                <label id="lblShowName" for="showName">Show name</label>
                             </div>
                             <div>
                                 <input type="checkbox" id="showDescription" name="showDescription" />
-                                <label for="showDescription">Mostrar descripción</label>
+                                <label id="lblShowDescription" for="showDescription">Show Description</label>
                             </div>
                             <div>
                                 <input type="checkbox" id="showPrices" name="showPrices" />
-                                <label for="showPrices">Mostrar precios</label>
+                                <label id="lblShowPrices" for="showPrices">Show Prices</label>
                             </div>
                             <div>
                                 <input type="checkbox" id="showObservations" name="showObservations" />
-                                <label for="showObservations">Mostrar observaciones</label>
+                                <label id="lblShowObservations" for="showObservations">Show Observations</label>
                             </div>
                         </fieldset>
                     </div>
-                    <input type="submit" value="Guardar" class="formSave" onclick="saveConfiguration()" />
+                    <input id="btnSaveConfiguration" type="submit" value="Save" class="formSave" />
                 </form>
             </div>
             <div id="item-form" class="app__workspace__item-form">
                 <form id="productForm" onsubmit="saveProduct()" method="POST">
                     <div class="formBackground">
-                        <div class="titleHeader">Producto</div>
-                        <label for="code">Código</label>
+                        <div id="lblItem" class="titleHeader">Item</div>
+                        <label id="lblCode" for="code">Code</label>
                         <input type="text" id="code" name="code" readonly />
-                        <label for="name">Nombre</label>
-                        <input type="text" id="name" name="name" placeholder="Nombre del producto" />
-                        <label for="description">Descripción</label>
-                        <textarea id="description" name="description" placeholder="Descripción del producto"></textarea>
+                        <label id="lblName" for="name">Name</label>
+                        <input type="text" id="name" name="name" />
+                        <label id="lblDescription" for="description">Description</label>
+                        <textarea id="description" name="description"></textarea>
                         <fieldset class="pricesList">
-                            <legend>Precios</legend>
+                            <legend id="lblPrices">Prices</legend>
                             <div class="priceContainer">
                                 <div>
-                                    <label for="size">Tamaño</label>
+                                    <label id="lblSize" for="size">Size</label>
                                     <input type="text" id="size" name="size" />
                                 </div>
                                 <div>
-                                    <label for="size">Precio</label>
+                                    <label id="lblPrice" for="price">Price</label>
                                     <input type="text" id="price" name="price" />
                                 </div>
                                 <div class="priceControls">
                                     <input
+                                        id="btnAddPrice"
                                         type="button"
-                                        value="Agregar"
+                                        value="Add"
                                         style="background-color: #2196f3"
                                         onclick="addPrice()"
                                     />
@@ -123,33 +124,33 @@
                                 <table id="pricesTable">
                                     <thead>
                                         <tr>
-                                            <th>Tamaño</th>
-                                            <th>Precio</th>
-                                            <th>Eliminar</th>
+                                            <th id="lblTableSize">Size</th>
+                                            <th id="lblTablePrice">Price</th>
+                                            <th id="lblTableRemove">Remove</th>
                                         </tr>
                                     </thead>
                                     <tbody id="pricesTableBody"></tbody>
                                 </table>
                             </div>
                         </fieldset>
-                        <label for="observations">Observaciones</label>
-                        <input type="text" id="observations" name="observations" placeholder="Información adicional" />
+                        <label id="lblObservations" for="observations">Observations</label>
+                        <input type="text" id="observations" name="observations" />
                         <input
                             type="checkbox"
                             id="active"
                             name="active"
                             style="margin-top: 10px; margin-bottom: 10px"
                         />
-                        <span><label for="active">Activo</label></span>
+                        <span><label id="lblActive" for="active">Active</label></span>
                     </div>
-                    <input type="submit" value="Guardar" class="formSave" />
+                    <input id="btnSaveProduct" type="submit" value="Save" class="formSave" />
                 </form>
             </div>
             <div id="notification-area" class="app__workspace__notif-area">
                 <div class="app__workspace__notif-frame">
                     <div id="notification-text" class="app__workspace__notif-text"></div>
                     <div id="notification-action" class="app__workspace__notif-action">
-                        <button onclick="createExampleCatalog()" class="app__workspace__create-catalog-button">Crear Catálogo de Ejemplo</button>
+                        <button id="btnCreateExampleCompany" onclick="createExampleCompany()" class="app__workspace__create-catalog-button">Create Example Company</button>
                     </div>
                 </div>
             </div>

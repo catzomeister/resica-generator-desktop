@@ -1,7 +1,7 @@
 {
-  "name": "nauti-catagen-gui",
+  "name": "nauti-resica-generator",
   "version": "1.0.0",
-  "description": "GUI for Catagen made with Electron",
+  "description": "GUI for RESICA Generator made with Electron",
   "main": "app/index.js",
   "scripts": {
     "start": "electron .",
@@ -10,10 +10,10 @@
   },
   "keywords": [
     "Electron",
-    "Catagen"
+    "Resica"
   ],
   "author": "catzomeister",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^13.2.1",
     "eslint": "^8.2.0",

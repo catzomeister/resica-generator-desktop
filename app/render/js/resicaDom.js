@@ -1,4 +1,5 @@
 'use strict'
+
 class ResicaDom {
     constructor() {
         this.DISPLAY_NONE = 'none'

@@ -47,6 +47,8 @@ const labels = {
         'item.data.prices.table.delete': 'Eliminar',
         'item.data.observations': 'Observaciones',
         'item.data.active': 'Activo',
+        'yes': 'Sí',
+        'no': 'No'
     },
     en: {
         'its.not.resica.file': `The selected element it's not a Resica directory or Resica file`,
@@ -94,6 +96,8 @@ const labels = {
         'item.data.prices.table.delete': 'Delete',
         'item.data.observations': 'Observations',
         'item.data.active': 'Active',
+        'yes': 'Yes',
+        'no': 'No'
     }
 }
 

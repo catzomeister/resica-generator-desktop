@@ -230,7 +230,7 @@ function showDialog({ title, content, dialogType }) {
             title,
             message: content,
             type: dialogType,
-            buttons: ['Sí', 'No'],
+            buttons: [labels['yes'], labels['no']],
             defaultId: 0,
             cancelId: 1
         })

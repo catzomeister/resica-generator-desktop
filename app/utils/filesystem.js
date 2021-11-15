@@ -26,7 +26,6 @@ function loadDescriptor(descriptorRef) {
 function loadInfo(infoRef) {
     try {
         if (infoRef) {
-            console.log('infoRef: ', infoRef)
             const infoRaw = fs.readFileSync(
                 infoRef.path ||
                     (infoRef.endsWith(fileConstants.INFO_FILENAME)

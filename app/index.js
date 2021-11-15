@@ -8,8 +8,11 @@ const { createDocumentComponents } = require('./main/pdf/printers')
 // open a window
 const openWindow = () => {
     const win = new BrowserWindow({
-        width: 1600,
-        height: 800,
+        width: 1024,
+        height: 768,
+        minWidth: 600,
+        minHeight: 400,
+        icon: path.resolve(__dirname, 'render/assets/resica.ico'),
         //resizable: false
         webPreferences: {
             nodeIntegration: true,
@@ -22,7 +25,7 @@ const openWindow = () => {
     win.setMenuBarVisibility(false)
     win.loadFile(path.resolve(__dirname, 'render/html/index.html'))
 
-    win.webContents.openDevTools()
+   // win.webContents.openDevTools()
 
     return win
 }

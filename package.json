@@ -4,6 +4,9 @@
   "description": "GUI for RESICA Generator made with Electron",
   "main": "app/index.js",
   "scripts": {
+    "postinstall": "electron-builder install-app-deps",
+    "pack": "electron-builder build --dir",
+    "dist": "electron-builder build --win --linux",
     "start": "electron .",
     "sass:build": "node-sass app/render/scss/styles.scss -o app/render/css",
     "sass:watch": "node-sass -w app/render/scss -o app/render/css"
@@ -12,10 +15,42 @@
     "Electron",
     "Resica"
   ],
-  "author": "catzomeister",
+  "author": "catzomeister <catzomeister@gmail.com>",
   "license": "MIT",
+  "build": {
+    "appId": "micuadro-resica-v1",
+    "asar": true,
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": [
+        "NSIS",
+        "portable"
+      ],
+      "icon": "build/icon.ico"
+    }
+  },
   "devDependencies": {
     "electron": "^13.2.1",
+    "electron-builder": "^23.0.3",
     "eslint": "^8.2.0",
     "node-sass": "^5.0.0"
   },

@@ -224,7 +224,7 @@ function showDialog({ title, content, dialogType }) {
     if (dialogType === 'error') {
         remote.dialog.showErrorBox(title, content)
     } else if (dialogType === 'message') {
-        remote.dialog.showMessageBox({ title, message: content, type: 'info' })
+        remote.dialog.showMessageBox(remote.getCurrentWindow(), { title, message: content, type: 'info' })
     } else if (dialogType === 'question') {
         const clicked = remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
             title,
@@ -294,7 +294,7 @@ window.printPdf = () => {
         const notifMsg = document.getElementById('notification-text')
 
         dom.setStyleDisplay(dom.DISPLAY_BLOCK, ['workspace'])
-            .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume'])
+            .setStyleDisplay(dom.DISPLAY_NONE, ['catalog-resume', 'notification-action'])
             .setStyleDisplay(dom.DISPLAY_FLEX, ['notification-area'])
 
         if (success) {

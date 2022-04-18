@@ -37,7 +37,7 @@ function getCoverPagePrinter(doc, coverPage) {
         // Version
         printText(coverPage.version)
         // Logo
-        doc.image(coverPage.company.imagePath, doc.page.width / 2 - 150, 250, {
+        doc.image(coverPage.company.imagePath, doc.page.width / 2 - 150, 265, {
             fit: [300, 300],
             align: 'center',
             valign: 'center'
